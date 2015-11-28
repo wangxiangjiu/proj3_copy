@@ -15,6 +15,8 @@ public class UnitTest {
         textui.runClasses(UnitTest.class);
     }
 
+    @Test
+    public void dummy() {}
     /** A dummy test to avoid complaint. */
     @Test
     public void placeholderTest() {
