@@ -12,6 +12,7 @@ public class CommandInterpreter {
             initCommand();
             break;
         case "add":
+            new AddCommand();
             break;
         case "commit":
             break;
