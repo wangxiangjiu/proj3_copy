@@ -4,6 +4,8 @@ import ucb.junit.textui;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+
 /** The suite of all JUnit tests for the gitlet package.
  *  @author
  */
@@ -31,7 +33,7 @@ public class UnitTest {
     }
     
     @Test
-    public void testInit() {
+    public void testInit() throws IOException, ClassNotFoundException {
         String[] string = new String[1];
         string[0] = "init";
         CommandInterpreter inter = new CommandInterpreter(string);

@@ -7,10 +7,10 @@ import java.util.List;
 
 public class CommandInterpreter {
 
-    protected List<String> addStaging = new ArrayList<String>();
+    protected List<String> _staged = new ArrayList<String>();
     protected List<String> rmStaging = new ArrayList<String>();
 
-    public CommandInterpreter(String[] args) {
+    public CommandInterpreter(String[] args) throws IOException, ClassNotFoundException {
         switch (args[0]) {
         case "init":
             initCommand();
@@ -48,37 +48,47 @@ public class CommandInterpreter {
         }
     }
 
-    private void addCommand(String fileName) {
+    private void addCommand(String fileName) throws IOException, ClassNotFoundException {
         if (!new File(fileName).exists()) {
             System.err.println("File does not exist");
         } else {
-            addStaging.add(fileName);
+            GitFileWriter gt = new GitFileWriter(fileName);
+            _staged = gt.readObject();
+            _staged.add(fileName);
+            gt.writeObject(_staged);
         }
 
     }
 
-    private void initCommand() {
+    private void initCommand() throws IOException {
         if (new File(".gitlet").exists()) {
             return;
         } else {
+            File gitlet = new File(".gitlet");
+            gitlet.mkdir();
+            
+            File objects = new File(gitlet, "objects");
+            objects.mkdir();
+            
+            File refs = new File(gitlet, "refs");
+            refs.mkdir();
+            
+            File branches = new File(refs, "branches");
+            branches.mkdir();
+            
             Commit auto = new Commit();
+            
             GitFileWriter gt = new GitFileWriter(".gitlet/objects/" + auto._id);
-//            GitFileWriter gt2 = new GitFileWriter(".gitlet/refs/Head/master");
-//            File gitlet = new File(".gitlet");
-//            gitlet.mkdir();
-//            File objects = new File(gitlet, "objects");
-//            objects.mkdir();
-//            Commit auto = new Commit();
-//            File default1 = new File(objects, auto._id);
-//            try {
-//                default1.createNewFile();
-//                System.out.println("gitlet");
-//            } catch (IOException e) {
-//                /** Do nothing. */
-//            }
+            GitFileWriter gt2 = new GitFileWriter(".gitlet/refs/branches/master");
+            GitFileWriter gt3 = new GitFileWriter(".gitlet/objects/staging");
+            GitFileWriter gt4 = new GitFileWriter(".gitlet/HEAD");
+            
+            gt.writeFile(auto._id);
+            gt2.writeFile(auto._id);
+            gt3.writeObject(_staged);
+            gt4.writeFile("ref: .gitlet/refs/branches/master");
 
         }
-        // File file = new File(".gitlet").exists();
     }
 
 }

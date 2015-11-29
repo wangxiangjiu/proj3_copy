@@ -1,5 +1,6 @@
 package gitlet;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,8 +11,10 @@ import java.util.List;
 public class Main {
     
     /** Usage: java gitlet.Main ARGS, where ARGS contains
-     *  <COMMAND> <OPERAND> .... */
-    public static void main(String... args) {
+     *  <COMMAND> <OPERAND> .... 
+     * @throws IOException 
+     * @throws ClassNotFoundException */
+    public static void main(String... args) throws IOException, ClassNotFoundException {
         
         if (args.length == 0) {
             System.err.println("Please put arguments");
