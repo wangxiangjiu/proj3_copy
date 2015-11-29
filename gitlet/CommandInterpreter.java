@@ -3,7 +3,6 @@ package gitlet;
 import java.io.File;
 import java.io.IOException;
 
-import Commands.*;
 
 public class CommandInterpreter {
     

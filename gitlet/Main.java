@@ -3,7 +3,6 @@ package gitlet;
 import java.util.ArrayList;
 import java.util.List;
 
-import Commands.*;
 
 /** Driver class for Gitlet, the tiny stupid version-control system.
  *  @author Xiangjiu Wang.
