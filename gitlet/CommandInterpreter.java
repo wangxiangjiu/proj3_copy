@@ -1,6 +1,5 @@
 package gitlet;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,19 +8,26 @@ public class CommandInterpreter {
 
     protected List<String> _staged = new ArrayList<String>();
     protected List<String> rmStaging = new ArrayList<String>();
+    protected String[] _args;
+    protected CommandInterface _command;
 
     public CommandInterpreter(String[] args) throws IOException, ClassNotFoundException {
+        _args = args;
+    }
+    
+    boolean statement(String[] args) throws IOException, ClassNotFoundException {
         switch (args[0]) {
         case "init":
-            InitCommand ic = new InitCommand();
-            ic.execute(this);
+            _command = new InitCommand();
+            _command.execute(this);
             break;
         case "add":
-            // AddCommand add = new AddCommand(args[1]);
-            // add.execute();
-            addCommand(args[1]);
+            AddCommand add = new AddCommand(args[1]);
+            add.execute(this);
             break;
         case "commit":
+            CommitCommand cm = new CommitCommand();
+            cm.execute();
             break;
         case "rm":
             break;
@@ -44,21 +50,19 @@ public class CommandInterpreter {
         case "merge":
             break;
         default:
-            break;
-
+            throw new Error("unrecognizable command");
         }
+        return true;
+    }
+    
+    CommandInterface getCommand(String commandName) {
+        return _command;
+        
     }
 
-    private void addCommand(String fileName) throws IOException, ClassNotFoundException {
-        if (!new File(fileName).exists()) {
-            System.err.println("File does not exist");
-        } else {
-            GitFileWriter gt = new GitFileWriter(fileName);
-            _staged = gt.readObject();
-            _staged.add(fileName);
-            gt.writeObject(_staged);
-        }
-
-    }
-
+    
+    
+    
+    
+    
 }

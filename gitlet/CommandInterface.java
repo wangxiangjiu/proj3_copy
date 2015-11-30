@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public interface CommandInterface {
     
-    boolean dangerous();
-    void execute(CommandInterpreter commandInterpreter) throws IOException;
+      boolean isDangerous();
+      void execute(CommandInterpreter commandInterpreter) throws IOException, ClassNotFoundException;
 
 }

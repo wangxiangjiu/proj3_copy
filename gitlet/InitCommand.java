@@ -4,15 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class InitCommand implements CommandInterface {
-    
-    CommandInterpreter ic;
 
-    @Override
-    public boolean dangerous() {
-        return false;
-    }
-
-    @Override
     public void execute(CommandInterpreter CI) throws IOException {
         if (new File(".gitlet").exists()) {
             return;
@@ -41,5 +33,10 @@ public class InitCommand implements CommandInterface {
             gt3.writeObject(CI._staged);
             gt4.writeFile("ref: .gitlet/refs/branches/master");
         }
+    }
+
+    @Override
+    public boolean isDangerous() {
+        return false;
     }
 }
