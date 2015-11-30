@@ -1,5 +1,7 @@
 package gitlet;
 
+import java.io.IOException;
+
 public class AddCommand implements CommandInterface {
     
     public AddCommand(String fileName) {
@@ -13,7 +15,8 @@ public class AddCommand implements CommandInterface {
     }
 
     @Override
-    public void execute() {
+    public void execute(CommandInterpreter commandInterpreter) throws IOException {
+        // TODO Auto-generated method stub
         
     }
     
