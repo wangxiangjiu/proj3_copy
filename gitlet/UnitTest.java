@@ -4,6 +4,7 @@ import ucb.junit.textui;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.io.IOException;
 
 /** The suite of all JUnit tests for the gitlet package.
@@ -38,6 +39,8 @@ public class UnitTest {
         string[0] = "init";
         CommandInterpreter inter = new CommandInterpreter(string);
     }
+    
 }
+
 
 

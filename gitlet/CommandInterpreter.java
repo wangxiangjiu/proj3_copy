@@ -23,7 +23,7 @@ public class CommandInterpreter {
             addCommand(args[1]);
             break;
         case "commit":
-            commitCommand();
+            commitCommand(args[1]);
             break;
         case "rm":
             break;
@@ -50,7 +50,19 @@ public class CommandInterpreter {
         }
     }
     
-    private void commitCommand() {
+    @SuppressWarnings("unchecked")
+    private void commitCommand(String message) throws IOException, ClassNotFoundException {
+        String stagingFileName = ".gitlet/objects/staging";
+        GitletRepo gt = new GitletRepo(stagingFileName); // this is just gt3. We are not creating new staging file. 
+        ArrayList<File> _stagedFiles = (ArrayList<File>) gt.readObject();
+        ArrayList<byte[]> fileContents = new ArrayList<byte[]>();
+        
+        for (File file: _stagedFiles) {
+            fileContents.add(Utils.readContents(file));
+        }
+        
+        Commit currentCommit = new Commit();
+        
         
         
     }
@@ -76,6 +88,9 @@ public class CommandInterpreter {
             File branches = new File(refs, "branches");
             branches.mkdir();
             
+            File stagedFiles = new File(objects, "stagedFiles");
+            stagedFiles.mkdir();
+            
             Commit auto = new Commit();
             
             GitletRepo gt = new GitletRepo(".gitlet/objects/" + auto._id);
@@ -91,6 +106,7 @@ public class CommandInterpreter {
         }
     }
     
+    @SuppressWarnings("unchecked")
     private void addCommand(String fileName) throws IOException, ClassNotFoundException {
         String stagingFileName = ".gitlet/objects/staging";
         
@@ -98,9 +114,15 @@ public class CommandInterpreter {
             System.err.println("File does not exist");
         } else {
             GitletRepo gt = new GitletRepo(stagingFileName); // this is just gt3. We are not creating new staging file. 
-            _staged = gt.readObject();
+            _staged = (ArrayList<String>) gt.readObject();
+            File file = new File("./" + fileName);
             _staged.add(fileName);
             gt.writeObject(_staged);
+            byte[] contents = Utils.readContents(file);
+            
+            File destination = new File(".gitlet/objects/stagedFiles/" + fileName);
+            Utils.writeContents(destination, contents);
+            
         }
     }
 

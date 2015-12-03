@@ -22,16 +22,16 @@ public class Commit implements Serializable {
     }
 
     public Commit(long timeStamp, String logMessage,
-            HashMap<String, String> ref, String parent) {
+            HashMap<String, String> ref, String parentId) {
         _timeStamp = timeStamp;
         _logMessage = logMessage;
         _ref = ref;
-        _parent = parent;
+        _parent = parentId;
 
         List<Object> text = new ArrayList<Object>();
 
-        if (parent != null) {
-            text.add(parent.toString());
+        if (parentId != null) {
+            text.add(parentId.toString());
 //            text.add(parent._ref);
         }
         text.add(_logMessage);

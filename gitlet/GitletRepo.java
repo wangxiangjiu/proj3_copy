@@ -44,19 +44,20 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
 
     /** Write the file to the outPut. */
     @SuppressWarnings("resource")
-    public void writeObject(List<String> staging) throws IOException {
+    public void writeObject(Object obj) throws IOException {
         OutputStream file = new FileOutputStream(_file);
         ObjectOutput output = new ObjectOutputStream(file);
-        output.writeObject(staging);
+        output.writeObject(obj);
     }
 
     /** Return */
-    @SuppressWarnings({ "unchecked", "resource" })
-    public ArrayList<String> readObject() throws IOException, ClassNotFoundException {
+    @SuppressWarnings({ "resource" })
+    public Object readObject() throws IOException, ClassNotFoundException {
         InputStream file = new FileInputStream(_file);
         ObjectInput input = new ObjectInputStream(file);
-        return (ArrayList<String>) input.readObject();
+        return input.readObject();
     }
+
 
     @Override
     public ArrayList<Commit> getAllCommits() {
@@ -84,42 +85,42 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
 
     }
 
-    public void recoverToStaging() {
+    public void recoverStaging() {
 
     }
 
-    /**Return a commit recovered from COMMITID. */
-    @SuppressWarnings({ "resource", "unchecked" })
-    public Commit recoverCommit(String commitID) throws IOException, ClassNotFoundException {
-        String objDir = ".gitlet/objects/" + commitID;
-        File d = new File(objDir);
-
-        if (!d.exists()) {
-            throw new IllegalArgumentException("commit not found!");
-        }
-
-        String filename = objDir + "/" + commitID;
-        Commit recovered = null;
-        Long timeStamp;
-        String message;
-        HashMap<String, String> filePointers;
-        File f = new File(filename);
-        if (f.exists()) {
-            InputStream file = new FileInputStream(filename);
-            ObjectInput input = new ObjectInputStream(file);
-            /**how does readObject works. */
-            String parentId = (String) input.readObject();
-            message = (String) input.readObject();
-            timeStamp = (Long) input.readObject();
-            filePointers = (HashMap<String, String>) input.readObject();
-            recovered = new Commit(timeStamp, message, filePointers, parentId);
-            return recovered;
-
-        } else {
-            System.out.println("Id: " + commitID + " not found!");
-            return null;
-        }
-    }
+//    /**Return a commit recovered from COMMITID. */
+//    @SuppressWarnings({ "resource", "unchecked" })
+//    public Commit recoverCommit(String commitID) throws IOException, ClassNotFoundException {
+//        String objDir = ".gitlet/objects/" + commitID;
+//        File d = new File(objDir);
+//
+//        if (!d.exists()) {
+//            throw new IllegalArgumentException("commit not found!");
+//        }
+//
+//        String filename = objDir + "/" + commitID;
+//        Commit recovered = null;
+//        Long timeStamp;
+//        String message;
+//        HashMap<String, String> filePointers;
+//        File f = new File(filename);
+//        if (f.exists()) {
+//            InputStream file = new FileInputStream(filename);
+//            ObjectInput input = new ObjectInputStream(file);
+//            /**how does readObject works. */
+//            String parentId = (String) input.readObject();
+//            message = (String) input.readObject();
+//            timeStamp = (Long) input.readObject();
+//            filePointers = (HashMap<String, String>) input.readObject();
+//            recovered = new Commit(timeStamp, message, filePointers, parentId);
+//            return recovered;
+//
+//        } else {
+//            System.out.println("Id: " + commitID + " not found!");
+//            return null;
+//        }
+//    }
 
     public String[] getAllBranches() {
         return new File(".gitlet/refs/branches").list();

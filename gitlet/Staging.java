@@ -5,9 +5,10 @@ import java.util.List;
 
 public class Staging {
     
-    protected List<String> _staged = new ArrayList<String>();
+    protected List<String> _staged;
+    protected List<String> _filesToRemove;
     
-    public Staging(List<String> staged){
+    public Staging(ArrayList<String> staged){
         _staged = staged;
     }
 
