@@ -14,7 +14,7 @@ public class Commit implements Serializable {
 
     protected Long _timeStamp;
     protected String _logMessage;
-    protected HashMap<String, String> _ref;
+    protected HashMap<String, String> _filePointers;
     protected String _parent;
 
     public Commit() {
@@ -25,7 +25,7 @@ public class Commit implements Serializable {
             HashMap<String, String> ref, String parentId) {
         _timeStamp = timeStamp;
         _logMessage = logMessage;
-        _ref = ref;
+        _filePointers = ref;
         _parent = parentId;
 
         List<Object> text = new ArrayList<Object>();

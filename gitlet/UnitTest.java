@@ -40,6 +40,15 @@ public class UnitTest {
         CommandInterpreter inter = new CommandInterpreter(string);
     }
     
+    @Test
+    public void testGetText() throws IOException {
+        GitletRepo repo = new GitletRepo(".gitlet/HEAD");
+        String a = repo.getText(".gitlet/HEAD");
+        System.out.println(a);
+        System.out.println("fuck");
+        System.out.println(repo.getCurrentHeadPointer());
+    }
+    
 }
 
 

@@ -10,7 +10,6 @@ public class CommandInterpreter {
     protected List<String> _staged = new ArrayList<String>();
     protected List<String> rmStaging = new ArrayList<String>();
     protected String[] _args;
-//    protected CommandInterface _command;
     protected boolean dangerous;
 
     public CommandInterpreter(String[] args) throws IOException, ClassNotFoundException {
@@ -53,7 +52,7 @@ public class CommandInterpreter {
     @SuppressWarnings("unchecked")
     private void commitCommand(String message) throws IOException, ClassNotFoundException {
         String stagingFileName = ".gitlet/objects/staging";
-        GitletRepo gt = new GitletRepo(stagingFileName); // this is just gt3. We are not creating new staging file. 
+        GitletRepo gt = new GitletRepo(stagingFileName); 
         ArrayList<File> _stagedFiles = (ArrayList<File>) gt.readObject();
         ArrayList<byte[]> fileContents = new ArrayList<byte[]>();
         
@@ -61,43 +60,37 @@ public class CommandInterpreter {
             fileContents.add(Utils.readContents(file));
         }
         
+        String currentCommitId = gt.getCurrentHeadPointer();
+        Commit currentHead = gt.recoverCommit(currentCommitId);
+
         Commit currentCommit = new Commit();
         
+        gt.writeObject(new Staging());
         
         
     }
 
-//    CommandInterface getCommand(String commandName) {
-//        return _command;
-//        
-//    }
-    
+    /**The command creates .gitlet folder. */
     private void initCommand() throws IOException {
         if (new File(".gitlet").exists()) {
+            System.out.println("fuck, .gitlet exists already");
             return;
         } else {
             File gitlet = new File(".gitlet");
             gitlet.mkdir();
-            
             File objects = new File(gitlet, "objects");
             objects.mkdir();
-            
             File refs = new File(gitlet, "refs");
             refs.mkdir();
-            
             File branches = new File(refs, "branches");
             branches.mkdir();
-            
             File stagedFiles = new File(objects, "stagedFiles");
             stagedFiles.mkdir();
-            
             Commit auto = new Commit();
-            
             GitletRepo gt = new GitletRepo(".gitlet/objects/" + auto._id);
             GitletRepo gt2 = new GitletRepo(".gitlet/refs/branches/master");
             GitletRepo gt3 = new GitletRepo(".gitlet/objects/staging");
             GitletRepo gt4 = new GitletRepo(".gitlet/HEAD");
-            
             gt.writeFile(auto._id);
             gt2.writeFile(auto._id);
             gt3.writeObject(_staged);
@@ -105,24 +98,21 @@ public class CommandInterpreter {
 
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     private void addCommand(String fileName) throws IOException, ClassNotFoundException {
         String stagingFileName = ".gitlet/objects/staging";
-        
         if (!new File(fileName).exists()) {
             System.err.println("File does not exist");
         } else {
-            GitletRepo gt = new GitletRepo(stagingFileName); // this is just gt3. We are not creating new staging file. 
+            GitletRepo gt = new GitletRepo(stagingFileName);
             _staged = (ArrayList<String>) gt.readObject();
             File file = new File("./" + fileName);
             _staged.add(fileName);
             gt.writeObject(_staged);
             byte[] contents = Utils.readContents(file);
-            
             File destination = new File(".gitlet/objects/stagedFiles/" + fileName);
             Utils.writeContents(destination, contents);
-            
         }
     }
 

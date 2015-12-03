@@ -7,5 +7,4 @@ public interface GitletRepoHeader {
     
     public void writeFile(String text) throws IOException;
     public ArrayList<Commit> getAllCommits();
-    public String getCurrentCommitId();
 }
