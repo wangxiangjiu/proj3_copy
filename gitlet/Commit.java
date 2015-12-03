@@ -2,6 +2,7 @@ package gitlet;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,15 +14,15 @@ public class Commit implements Serializable {
 
     protected Long _timeStamp;
     protected String _logMessage;
-    protected Map.Entry<String, Blobs> _ref;
-    protected Commit _parent;
+    protected HashMap<String, String> _ref;
+    protected String _parent;
 
     public Commit() {
         this(0L, "", null, null);
     }
 
     public Commit(long timeStamp, String logMessage,
-            Map.Entry<String, Blobs> ref, Commit parent) {
+            HashMap<String, String> ref, String parent) {
         _timeStamp = timeStamp;
         _logMessage = logMessage;
         _ref = ref;

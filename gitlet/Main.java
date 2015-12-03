@@ -27,16 +27,16 @@ public class Main {
 
         CommandInterpreter cp = new CommandInterpreter(args);
 
-        if (cp.statement(args)) {
-            CommandInterface c = cp.getCommand(args[0]);
-            if (c.isDangerous()) {
-                System.out.println("Warning: The command you entered my alter the files "
-                        + "in your owrking directory. Uncomitted changes may be lost. "
-                        + "Are you srue you want to continue? (yes/no)");
-            }
-        } else {
-
-        }
+//        if (cp.statement(args)) {
+//            CommandInterface c = cp.getCommand(args[0]);
+//            if (c.isDangerous()) {
+//                System.out.println("Warning: The command you entered my alter the files "
+//                        + "in your owrking directory. Uncomitted changes may be lost. "
+//                        + "Are you srue you want to continue? (yes/no)");
+//            }
+//        } else {
+//
+//        }
 
     }
 

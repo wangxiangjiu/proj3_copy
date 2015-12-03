@@ -25,8 +25,8 @@ public class UnitTest {
     @Test
     public void testCommit() {
         Commit p1 = new Commit();
-        Commit s1 = new Commit(0L, "", null, p1);
-        Commit s2 = new Commit(0L, "", null, p1);
+        Commit s1 = new Commit(0L, "", null, "");
+        Commit s2 = new Commit(0L, "", null, "");
         assertEquals(false, p1._id == s1._id);
         assertEquals(false, s1._id == s2._id);
         
