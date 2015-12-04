@@ -62,16 +62,21 @@ public class CommandInterpreter {
         Commit.mkdir();
         GitletRepo gt3 = new GitletRepo(".gitlet/objects/" + newCommit._id + "/" + newCommit._id);
         gt3.writeFile(newCommit._id);
-        System.out.println(_stagedFiles);
+        // System.out.println(_stagedFiles);
         for (File file: _stagedFiles) {
+            File newFile = new File(Commit, file.getName());
+            System.out.println(file.getName());
+            newFile.createNewFile();
            byte[] contents = Utils.readContents(file);
-           Utils.writeContents(Commit, contents);
+           Utils.writeContents(newFile, contents);
         }
 
         for (File file: _stagedFiles) {
             file.delete();
+            System.out.println(file.getPath());
         }
-        gt.writeObject(new Staging());
+        _stagedFiles = new ArrayList<File>();
+        gt.writeObject(_stagedFiles);
 
     }
 
