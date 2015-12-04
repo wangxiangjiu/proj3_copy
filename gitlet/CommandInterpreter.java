@@ -25,6 +25,7 @@ public class CommandInterpreter {
             commitCommand(args[1]);
             break;
         case "rm":
+            rmCommand(args[1]);
             break;
         case "log":
             break;
@@ -47,6 +48,12 @@ public class CommandInterpreter {
         default:
             throw new Error("unrecognizable command");
         }
+    }
+
+    /**Untrack the file with name FILENAME. */
+    private void rmCommand(String fileName) {
+        // TODO Auto-generated method stub
+        
     }
 
     @SuppressWarnings("unchecked")

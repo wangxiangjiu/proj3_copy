@@ -21,7 +21,7 @@ import java.util.HashMap;
 @SuppressWarnings("serial")
 public class GitletRepo implements GitletRepoHeader, Serializable {
 
-    /** File being writen to or read from .*/
+    /** File being written to or read from .*/
     private File _file;
 
     /** Constructor that takes in a file. */
