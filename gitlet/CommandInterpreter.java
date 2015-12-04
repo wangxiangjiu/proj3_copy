@@ -72,8 +72,7 @@ public class CommandInterpreter {
         }
 
         for (File file: _stagedFiles) {
-            file.delete();
-            System.out.println(file.getPath());
+           file.delete();
         }
         _stagedFiles = new ArrayList<File>();
         gt.writeObject(_stagedFiles);
@@ -122,11 +121,11 @@ public class CommandInterpreter {
             GitletRepo gt = new GitletRepo(stagingFileName);
             _staged = (ArrayList<File>) gt.readObject();
             File file = new File("./" + fileName);
-            _staged.add(file);
-            gt.writeObject(_staged);
             byte[] contents = Utils.readContents(file);
             File destination = new File(".gitlet/objects/stagedFiles/" + fileName);
             Utils.writeContents(destination, contents);
+            _staged.add(destination);
+            gt.writeObject(_staged);
         }
     }
 
