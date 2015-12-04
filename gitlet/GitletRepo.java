@@ -2,7 +2,6 @@ package gitlet;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -13,12 +12,7 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * The over-arching class that has all helper methods. Enables access to all
@@ -52,7 +46,7 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
     @SuppressWarnings("resource")
     public void writeCommit(Commit commit) throws IOException {
         String directoryString = ".gitlet/objects/" + commit._id;
-        String filename = directory + "/" + commit._id;
+        String filename = directoryString + "/" + commit._id;
         File directory = new File(directoryString);
         directory.mkdir();
             OutputStream file = new FileOutputStream(filename);
