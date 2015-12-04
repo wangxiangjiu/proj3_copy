@@ -2,6 +2,7 @@ package gitlet;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -26,15 +27,14 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class GitletRepo implements GitletRepoHeader, Serializable {
 
+    /***/
     private File _file;
-    protected ArrayList<Commit> _allCommits;
-    protected Commit _currCommit;
-    protected ArrayList<String> _staging;
-    
+
     /** Constructor that takes in a file. */
     public GitletRepo(File file) {
         _file = file;
     }
+
     /** The constructor of GitletRepo creates a file named FILENAME. */
     public GitletRepo(String fileName) throws IOException {
         _file = new File(fileName);
@@ -47,6 +47,22 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
         FileWriter writer = new FileWriter(_file);
         writer.write(text);
         writer.close();
+    }
+
+    @SuppressWarnings("resource")
+    public void saveCommit(Commit commit) throws IOException {
+        String directory = ".gitlet/objects/" + commit._id;
+        String filename = directory + "/" + commit._id;
+        File d = new File(directory);
+        d.mkdir();
+            OutputStream file = new FileOutputStream(filename);
+            ObjectOutput output = new ObjectOutputStream(file);
+
+            output.writeObject(commit._id);
+            output.writeObject(commit._timeStamp);
+            output.writeObject(commit._logMessage);
+            output.writeObject(commit._filePointers);
+            output.writeObject(commit._parent);
     }
 
     /** Write the file to the outPut. */
@@ -65,22 +81,12 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
         return input.readObject();
     }
 
-
-    @Override
-    public ArrayList<Commit> getAllCommits() {
-        return _allCommits;
-    }
-
     public void deleteBranches() {
 
     }
 
     public String getCurrentBranches() {
         return null;
-    }
-
-    public void addCommitIds(Commit i) {
-        _allCommits.add(i);
     }
 
     public String[] getAllBranches() {
@@ -91,13 +97,13 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
 
     }
 
-    /**Returns the commitID associated with the current commit. */
+    /** Returns the commitID associated with the current commit. */
     public String getCurrentHeadPointer() throws IOException {
         String head = getText(getCurrentBranchRef());
         return head;
     }
-    
-    /**Returns the string corresponding to the current branch. */
+
+    /** Returns the string corresponding to the current branch. */
     public String getCurrentBranchRef() throws IOException {
         String ref = getText(".gitlet/HEAD").replace("ref: ", "");
         return ref;
@@ -116,37 +122,34 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
         return getCurrentBranchRef().replace(".gitlet/refs/heads/", "");
     }
 
-    
-  /**Return a commit recovered from COMMITID. */
-  @SuppressWarnings({ "resource", "unchecked" })
-  public Commit recoverCommit(String commitID) throws IOException, ClassNotFoundException {
-      String objDir = ".gitlet/objects/" + commitID;
-      File d = new File(objDir);
+    /** Return a commit recovered from COMMITID. */
+    @SuppressWarnings({ "resource", "unchecked" })
+    public Commit recoverCommit(String commitID) throws IOException, ClassNotFoundException {
+        String objDir = ".gitlet/objects/" + commitID;
+        File d = new File(objDir);
 
-      if (!d.exists()) {
-          throw new IllegalArgumentException("commit not found!");
-      }
+        if (!d.exists()) {
+            throw new IllegalArgumentException("commit not found!");
+        }
 
-      String filename = objDir + "/" + commitID;
-      Commit recovered = null;
-      Long timeStamp;
-      String message;
-      HashMap<String, String> filePointers;
-      File f = new File(filename);
-      if (f.exists()) {
-          InputStream file = new FileInputStream(filename);
-          ObjectInput input = new ObjectInputStream(file);
-          /**how does readObject works. */
-          String parentId = (String) input.readObject();
-          message = (String) input.readObject();
-          timeStamp = (Long) input.readObject();
-          filePointers = (HashMap<String, String>) input.readObject();
-          recovered = new Commit(timeStamp, message, filePointers, parentId);
-          return recovered;
+        String filename = objDir + "/" + commitID;
+        Commit recovered = null;
+        File f = new File(filename);
+        if (f.exists()) {
+            InputStream file = new FileInputStream(filename);
+            ObjectInput input = new ObjectInputStream(file);
+            /** how does readObject works. */
+            String Id = (String) input.readObject();
+            Long timeStamp = (Long) input.readObject();
+            String message = (String) input.readObject();
+            HashMap<String, String> filePointers = (HashMap<String, String>) input.readObject();
+            String parent = (String) input.readObject();
+            recovered = new Commit(timeStamp, message, filePointers, parent);
+            return recovered;
 
-      } else {
-          System.out.println("Id: " + commitID + " not found!");
-          return null;
-      }
-  }
+        } else {
+            System.out.println("Id: " + commitID + " not found!");
+            return null;
+        }
+    }
 }

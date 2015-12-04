@@ -33,20 +33,34 @@ public class UnitTest {
         
     }
     
-    @Test
-    public void testInit() throws IOException, ClassNotFoundException {
-        String[] string = new String[1];
-        string[0] = "init";
-        CommandInterpreter inter = new CommandInterpreter(string);
-    }
+//    @Test
+//    public void testInit() throws IOException, ClassNotFoundException {
+//        String[] string = new String[1];
+//        string[0] = "init";
+//        CommandInterpreter inter = new CommandInterpreter(string);
+//    }
     
     @Test
     public void testGetText() throws IOException {
         GitletRepo repo = new GitletRepo(".gitlet/HEAD");
         String a = repo.getText(".gitlet/HEAD");
-        System.out.println(a);
-        System.out.println("fuck");
-        System.out.println(repo.getCurrentHeadPointer());
+//        System.out.println(a);
+//        System.out.println("fuck");
+//        System.out.println(repo.getCurrentHeadPointer());
+    }
+    
+    @Test
+    public void testRecoverCommit() throws IOException, ClassNotFoundException {
+        Commit c1 = new Commit(0L, "fuck yeah", null, "fdsfajlsdfkjalsdkfja");
+        File gitlet1 = new File(".gitlet1");
+        gitlet1.mkdir();
+        GitletRepo repo = new GitletRepo(".gitlet1");
+        repo.saveCommit(c1);
+        System.out.println(c1);
+        System.out.println(repo.recoverCommit(c1._id));
+       
+        
+//        assertEquals(true, c1 == repo.recoverCommit(c1._id));
     }
     
 }

@@ -56,12 +56,15 @@ public class CommandInterpreter {
         ArrayList<File> _stagedFiles = (ArrayList<File>) gt.readObject();
         GitletRepo gt2 = new GitletRepo(".gitlet/refs/branches/master");
         String currentCommitId = gt2.getCurrentHeadPointer();
-//        Commit currentHead = gt2.recoverCommit(currentCommitId);
-        Commit newCommit = new Commit(System.currentTimeMillis(), message, null, "");
+        //System.out.println(currentCommitId);
+        Commit currentHead = gt2.recoverCommit(currentCommitId);
+        Commit newCommit = new Commit(System.currentTimeMillis(), message, currentHead._filePointers, currentCommitId);
+        
         File Commit = new File(".gitlet/objects", newCommit._id);
         Commit.mkdir();
         GitletRepo gt3 = new GitletRepo(".gitlet/objects/" + newCommit._id + "/" + newCommit._id);
-        gt3.writeFile(newCommit._id);
+//        gt3.writeFile(newCommit._id);
+        gt3.saveCommit(newCommit);
         // System.out.println(_stagedFiles);
         for (File file: _stagedFiles) {
             File newFile = new File(Commit, file.getName());
@@ -76,6 +79,7 @@ public class CommandInterpreter {
         }
         _stagedFiles = new ArrayList<File>();
         gt.writeObject(_stagedFiles);
+        gt2.writeFile(newCommit._id);
 
     }
 
@@ -96,7 +100,7 @@ public class CommandInterpreter {
             branches.mkdir();
             File stagedFiles = new File(objects, "stagedFiles");
             stagedFiles.mkdir();
-            Commit auto = new Commit();
+            Commit auto = new Commit(System.currentTimeMillis(), "initial commit", null, null);
             File initialCommit = new File(objects, auto._id);
             initialCommit.mkdir();
             
@@ -104,7 +108,7 @@ public class CommandInterpreter {
             GitletRepo gt2 = new GitletRepo(".gitlet/refs/branches/master");
             GitletRepo gt3 = new GitletRepo(".gitlet/objects/staging");
             GitletRepo gt4 = new GitletRepo(".gitlet/HEAD");
-            gt.writeFile(auto._id);
+            gt.saveCommit(auto);     
             gt2.writeFile(auto._id);
             gt3.writeObject(_staged);
             gt4.writeFile("ref: .gitlet/refs/branches/master");
