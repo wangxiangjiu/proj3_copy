@@ -30,7 +30,11 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
     protected ArrayList<Commit> _allCommits;
     protected Commit _currCommit;
     protected ArrayList<String> _staging;
-
+    
+    /** Constructor that takes in a file. */
+    public GitletRepo(File file) {
+        _file = file;
+    }
     /** The constructor of GitletRepo creates a file named FILENAME. */
     public GitletRepo(String fileName) throws IOException {
         _file = new File(fileName);
@@ -92,7 +96,8 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
         String head = getText(getCurrentBranchRef());
         return head;
     }
-
+    
+    /**Returns the string corresponding to the current branch. */
     public String getCurrentBranchRef() throws IOException {
         String ref = getText(".gitlet/HEAD").replace("ref: ", "");
         return ref;

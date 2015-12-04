@@ -54,21 +54,26 @@ public class CommandInterpreter {
         String stagingFileName = ".gitlet/objects/staging";
         GitletRepo gt = new GitletRepo(stagingFileName); 
         ArrayList<File> _stagedFiles = (ArrayList<File>) gt.readObject();
-        ArrayList<byte[]> fileContents = new ArrayList<byte[]>();
-        
-        for (File file: _stagedFiles) {
-            fileContents.add(Utils.readContents(file));
-        }
-        
-        String currentCommitId = gt.getCurrentHeadPointer();
-        Commit currentHead = gt.recoverCommit(currentCommitId);
+        GitletRepo gt2 = new GitletRepo(".gitlet/refs/branches/master");
+        String currentCommitId = gt2.getCurrentHeadPointer();
+//        Commit currentHead = gt2.recoverCommit(currentCommitId);
+        Commit newCommit = new Commit(System.currentTimeMillis(), message, null, "");
+//        File Commit = new File(".gitlet/objects", newCommit._id);
+//        Commit.mkdir();
+//        GitletRepo gt3 = new GitletRepo(".gitlet/objects/" + newCommit._id + "/" + newCommit._id);
+//        gt3.writeFile(newCommit._id);
+//        for (File file: _stagedFiles) {
+//           byte[] contents = Utils.readContents(file);
+//           Utils.writeContents(Commit, contents);
+//        }
+//
+//        for (File file: _stagedFiles) {
+//            file.delete();
+//        }
+//        gt.writeObject(new Staging());
 
-        Commit currentCommit = new Commit();
-        
-        gt.writeObject(new Staging());
-        
-        
     }
+
 
     /**The command creates .gitlet folder. */
     private void initCommand() throws IOException {
@@ -87,7 +92,10 @@ public class CommandInterpreter {
             File stagedFiles = new File(objects, "stagedFiles");
             stagedFiles.mkdir();
             Commit auto = new Commit();
-            GitletRepo gt = new GitletRepo(".gitlet/objects/" + auto._id);
+            File initialCommit = new File(objects, auto._id);
+            initialCommit.mkdir();
+            
+            GitletRepo gt = new GitletRepo(".gitlet/objects/" + auto._id + "/" + auto._id);
             GitletRepo gt2 = new GitletRepo(".gitlet/refs/branches/master");
             GitletRepo gt3 = new GitletRepo(".gitlet/objects/staging");
             GitletRepo gt4 = new GitletRepo(".gitlet/HEAD");

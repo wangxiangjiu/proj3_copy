@@ -27,12 +27,10 @@ public class Commit implements Serializable {
         _logMessage = logMessage;
         _filePointers = ref;
         _parent = parentId;
-
         List<Object> text = new ArrayList<Object>();
 
         if (parentId != null) {
             text.add(parentId.toString());
-//            text.add(parent._ref);
         }
         text.add(_logMessage);
         text.add(_timeStamp.toString());
