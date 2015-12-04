@@ -4,14 +4,17 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
+/** Command Interpreter for gitlet. */
 public class CommandInterpreter {
-
+    /** List of all staged files. */
     protected List<File> _staged = new ArrayList<File>();
+    /** List of files to be removed from staging area. */
     protected List<String> rmStaging = new ArrayList<String>();
+    /** Argumennts passed. */
     protected String[] _args;
+    /** Is true for a dangerous command. */
     protected boolean dangerous;
-
+    /** Creates a command interpreter with ARGS. */
     public CommandInterpreter(String[] args) throws IOException, ClassNotFoundException {
         _args = args;
         switch (args[0]) {
@@ -48,7 +51,7 @@ public class CommandInterpreter {
             throw new Error("unrecognizable command");
         }
     }
-    
+    /** Processes a commit with given MESSAGE. */
     @SuppressWarnings("unchecked")
     private void commitCommand(String message) throws IOException, ClassNotFoundException {
         String stagingFileName = ".gitlet/objects/staging";
@@ -56,16 +59,13 @@ public class CommandInterpreter {
         ArrayList<File> _stagedFiles = (ArrayList<File>) gt.readObject();
         GitletRepo gt2 = new GitletRepo(".gitlet/refs/branches/master");
         String currentCommitId = gt2.getCurrentHeadPointer();
-        //System.out.println(currentCommitId);
         Commit currentHead = gt2.recoverCommit(currentCommitId);
         Commit newCommit = new Commit(System.currentTimeMillis(), message, currentHead._filePointers, currentCommitId);
         
         File Commit = new File(".gitlet/objects", newCommit._id);
         Commit.mkdir();
         GitletRepo gt3 = new GitletRepo(".gitlet/objects/" + newCommit._id + "/" + newCommit._id);
-//        gt3.writeFile(newCommit._id);
         gt3.saveCommit(newCommit);
-        // System.out.println(_stagedFiles);
         for (File file: _stagedFiles) {
             File newFile = new File(Commit, file.getName());
             System.out.println(file.getName());
@@ -80,7 +80,6 @@ public class CommandInterpreter {
         _stagedFiles = new ArrayList<File>();
         gt.writeObject(_stagedFiles);
         gt2.writeFile(newCommit._id);
-
     }
 
 
@@ -103,19 +102,18 @@ public class CommandInterpreter {
             Commit auto = new Commit(System.currentTimeMillis(), "initial commit", null, null);
             File initialCommit = new File(objects, auto._id);
             initialCommit.mkdir();
-            
+
             GitletRepo gt = new GitletRepo(".gitlet/objects/" + auto._id + "/" + auto._id);
             GitletRepo gt2 = new GitletRepo(".gitlet/refs/branches/master");
             GitletRepo gt3 = new GitletRepo(".gitlet/objects/staging");
             GitletRepo gt4 = new GitletRepo(".gitlet/HEAD");
-            gt.saveCommit(auto);     
+            gt.saveCommit(auto);
             gt2.writeFile(auto._id);
             gt3.writeObject(_staged);
             gt4.writeFile("ref: .gitlet/refs/branches/master");
-
         }
     }
-
+    /** Adds file with given FILENAME to staged area. */
     @SuppressWarnings("unchecked")
     private void addCommand(String fileName) throws IOException, ClassNotFoundException {
         String stagingFileName = ".gitlet/objects/staging";
@@ -132,12 +130,4 @@ public class CommandInterpreter {
             gt.writeObject(_staged);
         }
     }
-
-
-
-    
-    
-    
-    
-    
 }
