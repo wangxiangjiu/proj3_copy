@@ -55,9 +55,9 @@ public class UnitTest {
         File gitlet1 = new File(".gitlet1");
         gitlet1.mkdir();
         GitletRepo repo = new GitletRepo(".gitlet1");
-        repo.saveCommit(c1);
+        repo.writeCommit(c1);
         System.out.println(c1);
-        System.out.println(repo.recoverCommit(c1._id));
+        System.out.println(repo.readCommit(c1._id));
        
         
 //        assertEquals(true, c1 == repo.recoverCommit(c1._id));

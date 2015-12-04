@@ -12,6 +12,7 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -129,7 +130,7 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
             String Id = (String) input.readObject();
             Long timeStamp = (Long) input.readObject();
             String message = (String) input.readObject();
-            HashMap<String, String> filePointers = (HashMap<String, String>) input.readObject();
+            ArrayList<String> filePointers = (ArrayList<String>) input.readObject();
             String parent = (String) input.readObject();
             recovered = new Commit(timeStamp, message, filePointers, parent);
             return recovered;

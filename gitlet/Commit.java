@@ -17,7 +17,7 @@ public class Commit implements Serializable {
     /**The logMessage of the commit. */
     protected String _logMessage;
     /**The filePointers that is a mapping of file names to blob references. */
-    protected HashMap<String, String> _filePointers;
+    protected ArrayList<String> _filePointers = new ArrayList<String>();
     /**The single parent reference. */
     protected String _parent;
 
@@ -28,7 +28,7 @@ public class Commit implements Serializable {
 
     /**The constructor of commit consists of a LOGMESSAGE, TIMESTAMP, FILEPOINTERS, and PARENTSID. */
     public Commit(long timeStamp, String logMessage,
-            HashMap<String, String> filePointers, String parentId) {
+            ArrayList<String> filePointers, String parentId) {
         _timeStamp = timeStamp;
         _logMessage = logMessage;
         _filePointers = filePointers;
