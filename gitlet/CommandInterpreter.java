@@ -10,7 +10,7 @@ public class CommandInterpreter {
     protected List<File> _staged = new ArrayList<File>();
     /** List of files to be removed from staging area. */
     protected List<String> rmStaging = new ArrayList<String>();
-    /** Argumennts passed. */
+    /** Arguments passed. */
     protected String[] _args;
     /** Is true for a dangerous command. */
     protected boolean dangerous;
