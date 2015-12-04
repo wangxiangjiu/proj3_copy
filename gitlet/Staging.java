@@ -5,12 +5,12 @@ import java.util.List;
 
 public class Staging {
     
-    protected List<String> _staged;
-    protected List<String> _filesToRemove;
+    protected ArrayList<String> _filesToAdd;
+    protected ArrayList<String> _filesToRm;
     
     public Staging(){
-        _staged = new ArrayList<String>();
-        _filesToRemove = new ArrayList<String>();
+        _filesToAdd = new ArrayList<String>();
+        _filesToRm = new ArrayList<String>();
     }
 
 }

@@ -35,6 +35,35 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
         _file = new File(fileName);
         _file.createNewFile();
     }
+    
+    public void createFile(String fileName, String fileText) {
+        File f = new File(fileName);
+        if (!f.exists()) {
+            try {
+                f.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        writeFile(fileName, fileText);
+    }
+    
+    private void writeFile(String fileName, String fileText) {
+        FileWriter fw = null;
+        try {
+            File f = new File(fileName);
+            fw = new FileWriter(f, false);
+            fw.write(fileText);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                fw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     /** Writes TEXT to _file instance. */
     @Override
@@ -82,7 +111,13 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
     }
     /** Delete branches. */
     public void deleteBranches() {
-
+    }
+    /** Creates a new directory with DIRNAME. */
+    public void createDirectory(String dirName) {
+        File f = new File(dirName);
+        if (!f.exists()) {
+            f.mkdirs();
+        }
     }
     /** Gets the current Branches from. */
     public String getCurrentBranches() {
