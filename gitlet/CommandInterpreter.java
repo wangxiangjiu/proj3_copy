@@ -65,15 +65,12 @@ public class CommandInterpreter {
         ArrayList<File> _stagedFiles = (ArrayList<File>) gt.readObject();
         GitletRepo gt2 = new GitletRepo(".gitlet/refs/branches/master");
         String currentCommitId = gt2.getCurrentHeadPointer();
-        Commit currentHead = gt2.recoverCommit(currentCommitId);
         Commit currentHead = gt2.readCommit(currentCommitId);
         Commit newCommit = new Commit(System.currentTimeMillis(), message, currentHead._filePointers, currentCommitId);
         
         File Commit = new File(".gitlet/objects", newCommit._id);
         Commit.mkdir();
         GitletRepo gt3 = new GitletRepo(".gitlet/objects/" + newCommit._id + "/" + newCommit._id);
-        gt3.saveCommit(newCommit);
-
         gt3.writeCommit(newCommit);
 
         for (File file: _stagedFiles) {
@@ -117,8 +114,6 @@ public class CommandInterpreter {
             GitletRepo gt2 = new GitletRepo(".gitlet/refs/branches/master");
             GitletRepo gt3 = new GitletRepo(".gitlet/objects/staging");
             GitletRepo gt4 = new GitletRepo(".gitlet/HEAD");
-
-            gt.saveCommit(auto);
             gt.writeCommit(auto);     
             gt2.writeFile(auto._id);
             gt3.writeObject(_staged);
