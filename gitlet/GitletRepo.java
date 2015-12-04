@@ -27,7 +27,7 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class GitletRepo implements GitletRepoHeader, Serializable {
 
-    /***/
+    /** File being writen to or read from .*/
     private File _file;
 
     /** Constructor that takes in a file. */
@@ -41,7 +41,7 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
         _file.createNewFile();
     }
 
-    /***/
+    /** Writes TEXT to _file instance. */
     @Override
     public void writeFile(String text) throws IOException {
         FileWriter writer = new FileWriter(_file);
@@ -50,11 +50,11 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
     }
 
     @SuppressWarnings("resource")
-    public void saveCommit(Commit commit) throws IOException {
-        String directory = ".gitlet/objects/" + commit._id;
+    public void writeCommit(Commit commit) throws IOException {
+        String directoryString = ".gitlet/objects/" + commit._id;
         String filename = directory + "/" + commit._id;
-        File d = new File(directory);
-        d.mkdir();
+        File directory = new File(directoryString);
+        directory.mkdir();
             OutputStream file = new FileOutputStream(filename);
             ObjectOutput output = new ObjectOutputStream(file);
 
@@ -80,51 +80,44 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
         ObjectInput input = new ObjectInputStream(file);
         return input.readObject();
     }
-
-    public void deleteBranches() {
-
-    }
-
-    public String getCurrentBranches() {
-        return null;
-    }
-
-    public String[] getAllBranches() {
-        return new File(".gitlet/refs/branches").list();
-    }
-
-    public void saveCommit() {
-
-    }
-
     /** Returns the commitID associated with the current commit. */
     public String getCurrentHeadPointer() throws IOException {
         String head = getText(getCurrentBranchRef());
         return head;
     }
+    /** Delete branches. */
+    public void deleteBranches() {
 
+    }
+    /** Gets the current Branches from. */
+    public String getCurrentBranches() {
+        return null;
+    }
+    /** Returns a STRING[] of all the branches. */
+    public String[] getAllBranches() {
+        return new File(".gitlet/refs/branches").list();
+    }
     /** Returns the string corresponding to the current branch. */
     public String getCurrentBranchRef() throws IOException {
         String ref = getText(".gitlet/HEAD").replace("ref: ", "");
         return ref;
     }
-
+    /** Returns STRING of actual current branch. */
+    public String getCurrentBranch() throws IOException {
+        return getCurrentBranchRef().replace(".gitlet/refs/heads/", "");
+    }
+    /** Returns a STRING of contents of FILENAME. */
     public String getText(String fileName) throws IOException {
         File file = new File(fileName);
         return new String(Utils.readContents(file));
     }
-
+    /** Returns STRING representing the working directory. */
     public String getWorkingDirectory() {
         return System.getProperty("user.dir");
     }
-
-    public String getCurrentBranch() throws IOException {
-        return getCurrentBranchRef().replace(".gitlet/refs/heads/", "");
-    }
-
     /** Return a commit recovered from COMMITID. */
     @SuppressWarnings({ "resource", "unchecked" })
-    public Commit recoverCommit(String commitID) throws IOException, ClassNotFoundException {
+    public Commit readCommit(String commitID) throws IOException, ClassNotFoundException {
         String objDir = ".gitlet/objects/" + commitID;
         File d = new File(objDir);
 
@@ -138,7 +131,7 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
         if (f.exists()) {
             InputStream file = new FileInputStream(filename);
             ObjectInput input = new ObjectInputStream(file);
-            /** how does readObject works. */
+
             String Id = (String) input.readObject();
             Long timeStamp = (Long) input.readObject();
             String message = (String) input.readObject();
