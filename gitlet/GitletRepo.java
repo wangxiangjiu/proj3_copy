@@ -2,6 +2,7 @@ package gitlet;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
@@ -15,6 +16,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * The over-arching class that has all helper methods. Enables access to all
@@ -47,21 +49,59 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
 
     /** Write the file to the outPut. */
     @SuppressWarnings("resource")
-    public void writeObject(Object obj) throws IOException {
+    public void writeObject(Object obj, ObjectOutput output) throws IOException {
+        output.writeObject(obj);
+    }
+    
+    /** Creates Stream input. 
+     * @throws IOException */
+    public ObjectInput createInputStream() throws IOException {
+        InputStream file = new FileInputStream(_file);
+        ObjectInput input = new ObjectInputStream(file);
+        return input;
+    }
+    /** Creates Stream output.
+     * @throws IOException */
+    public ObjectOutput createOutputStream() throws IOException {
         OutputStream file = new FileOutputStream(_file);
         ObjectOutput output = new ObjectOutputStream(file);
-        output.writeObject(obj);
+        return output;
     }
 
     /** Return an Object that can be casted to String, Commit etc. */
-    @SuppressWarnings({ "resource" })
-    public Object readObject() throws IOException, ClassNotFoundException {
-        InputStream file = new FileInputStream(_file);
-        ObjectInput input = new ObjectInputStream(file);
+    public Object readObject(ObjectInput input) throws IOException, ClassNotFoundException {
         return input.readObject();
     }
+//    public static void writeToStaging(List<File> files, List<String> removed, List<String> added) throws IOException {
+//        String fileName = ".gitlet/objects/staging/staged";
+//        //File directory = new File(directoryString);
+//            OutputStream file = new FileOutputStream(fileName);
+//            ObjectOutput output = new ObjectOutputStream(file);
+//
+//            output.writeObject(files);
+//            output.writeObject(removed);
+//            output.writeObject(added);
+//            output.close();
+//    }
+//
+//    @SuppressWarnings("unchecked")
+//    public static  readStaging() throws IOException, ClassNotFoundException {
+//        String fileName = ".gitlet/objects/staging/staged";
+//
+//            InputStream file = new FileInputStream(fileName);
+//            ObjectInput input = new ObjectInputStream(file);
+//        
+//        List<List<Object>> files = new ArrayList<List<Object>>();
+//        files.add((List<Object>) input.readObject());
+//        files.add((List<Object>) input.readObject());
+//        files.add((List<Object>) input.readObject());
+//        input.close();
+//        return files;
+//        
+//    }
+
     /** Returns the commitID associated with the current commit. */
-    public String getCurrentHeadPointer() throws IOException {
+    public static String getCurrentHeadPointer() throws IOException {
         String head = getText(getCurrentBranchRef());
         return head;
     }
@@ -79,7 +119,9 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
         return objects.list(filter);
     }
     /** Delete branches. */
-    public void deleteBranches() {
+    public void deleteBranches(String branchName) {
+        File f = new File(".gitlet/refs/heads/" + branchName);
+        f.delete();
     }
     /** Creates a new directory with DIRNAME. */
     public void createDirectory(String dirName) {
@@ -88,25 +130,22 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
             f.mkdirs();
         }
     }
-    /** Gets the current Branches from. */
-    public String getCurrentBranches() {
-        return null;
-    }
+
     /** Returns a STRING[] of all the branches. */
-    public String[] getAllBranches() {
+    public static String[] getAllBranches() {
         return new File(".gitlet/refs/branches").list();
     }
     /** Returns the string corresponding to the current branch. */
-    public String getCurrentBranchRef() throws IOException {
+    public static String getCurrentBranchRef() throws IOException {
         String ref = getText(".gitlet/HEAD").replace("ref: ", "");
         return ref;
     }
     /** Returns STRING of actual current branch. */
-    public String getCurrentBranch() throws IOException {
-        return getCurrentBranchRef().replace(".gitlet/refs/heads/", "");
+    public static String getCurrentBranch() throws IOException {
+        return getCurrentBranchRef().replace(".gitlet/refs/branches/", "");
     }
     /** Returns a STRING of contents of FILENAME. */
-    public String getText(String fileName) throws IOException {
+    public static String getText(String fileName) throws IOException {
         File file = new File(fileName);
         return new String(Utils.readContents(file));
     }
