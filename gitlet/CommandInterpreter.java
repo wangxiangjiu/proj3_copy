@@ -4,17 +4,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /** Command Interpreter for gitlet. */
 public class CommandInterpreter {
     /** List of all staged files. */
     protected List<File> _staged = new ArrayList<File>();
-    /** List of files to be removed from staging area. */
-    protected List<String> rmStaging = new ArrayList<String>();
     /** Arguments passed. */
     protected String[] _args;
     /** Is true for a dangerous command. */
-    protected boolean dangerous;
+    protected boolean _dangerous;
 
     /** Creates a command interpreter with ARGS. */
     public CommandInterpreter(String[] args) throws IOException, ClassNotFoundException {
@@ -22,45 +23,107 @@ public class CommandInterpreter {
         switch (args[0]) {
         case "init":
             initCommand();
+            _dangerous = false;
             break;
         case "add":
             addCommand(args[1]);
+            _dangerous = false;
             break;
         case "commit":
             commitCommand(args[1]);
+            _dangerous = false;
             break;
         case "rm":
             rmCommand(args[1]);
+            _dangerous = true;
             break;
         case "log":
             logCommand();
+            _dangerous = false;
             break;
         case "global-log":
+            globLogCommand();
+            _dangerous = false;
             break;
         case "find":
+            _dangerous = false;
+            findCommand();
             break;
         case "status":
+            _dangerous = false;
             break;
         case "checkout":
+            _dangerous = true;
             break;
         case "branch":
+            _dangerous = false;
             break;
         case "rm-branch":
+            _dangerous = false;
             break;
         case "reset":
+            _dangerous = true;
             break;
         case "merge":
+            _dangerous = true;
             break;
         default:
             throw new Error("unrecognizable command");
         }
     }
 
-    /**Display information about each commit backwards 
-     * along the commit tree until the initial commit.*/
-    private void logCommand() {
+    private void findCommand() {
         // TODO Auto-generated method stub
         
+    }
+
+    /**Print all commits regardless of current branch. */
+    private void globLogCommand() throws IOException, ClassNotFoundException {
+        for(String id : GitletRepo.getAllCommitIds()){
+            Commit head = GitletRepo.readCommit(id);
+            System.out.println("====");
+            System.out.println("Commit " + head._id + ".");     
+            Date date1 = new Date(head._timeStamp);
+            Format format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String date = format.format(date1);          
+            System.out.println(date);
+            System.out.println(head._logMessage);  
+            System.out.println();
+        }
+    }
+
+    /**Display information about each commit backwards 
+     * along the commit tree until the initial commit.
+     * @throws IOException 
+     * @throws ClassNotFoundException */
+    private void logCommand() throws ClassNotFoundException, IOException {
+        GitletRepo gt = new GitletRepo(".gitlet/HEAD"); 
+        String id = gt.getCurrentHeadPointer();
+        Commit head = GitletRepo.readCommit(id);
+        GitletRepo gt2;
+ 
+        while(head._parent != null ){
+            gt2 = new GitletRepo(".gitlet/objects/"+ head._id + "/" + head._id); 
+            System.out.println("===");
+            System.out.println("Commit " + head._id + ".");     
+            Date date1 = new Date(head._timeStamp);
+            Format format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String date = format.format(date1);  
+            System.out.println(date);
+            System.out.println(head._logMessage);  
+            System.out.println();
+            head = gt2.readCommit(head._parent);
+        }
+
+        gt2 = new GitletRepo(".gitlet/objects/"+ head._id + "/" + head._id); 
+        System.out.println("===");
+        System.out.println("Commit " + head._id + ".");     
+        Date date1 = new Date(head._timeStamp);
+        Format format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String date = format.format(date1);  
+        System.out.println(date);
+        System.out.println(head._logMessage);  
+        System.out.println();
     }
 
     /**Untrack the file with name FILENAME. 
@@ -70,11 +133,12 @@ public class CommandInterpreter {
     private void rmCommand(String fileName) throws IOException, ClassNotFoundException {
         String stagingFileName = ".gitlet/objects/staging";
         GitletRepo gt = new GitletRepo(stagingFileName);
+        /**Need to change for all different branches. */ ////////////////////////////////////////////////////////////////////////////////
         GitletRepo gt2 = new GitletRepo(".gitlet/refs/branches/master");
         String currentCommitId = gt2.getCurrentHeadPointer();
-        Commit currentHead = gt2.readCommit(currentCommitId);
+        Commit currentHead = GitletRepo.readCommit(currentCommitId);
         _staged = (ArrayList<File>) gt.readObject();
-        File f1 =  new File(gt.getWorkingDirectory() + fileName);
+//        File f1 =  new File(gt.getWorkingDirectory() + fileName);
         int i = 0;
         for (File f: _staged) {
             if (fileName.equals(f.getName())) {
@@ -82,11 +146,9 @@ public class CommandInterpreter {
                 f.delete();
             }
         }
-        
         for (String a: currentHead._filePointers) {
             if (a.equals(fileName)) {
-               File f2 = new File(gt.getWorkingDirectory() + fileName);
-               System.out.println(f2.getPath());
+               File f2 = new File(gt.getWorkingDirectory() + "/" +  fileName);
                f2.delete();
             }
         }
@@ -109,7 +171,7 @@ public class CommandInterpreter {
         /**2nd gitletRepo to try to get the currentHead. */
         GitletRepo gt2 = new GitletRepo(".gitlet/refs/branches/master");
         String currentCommitId = gt2.getCurrentHeadPointer();
-        Commit currentHead = gt2.readCommit(currentCommitId);
+        Commit currentHead = GitletRepo.readCommit(currentCommitId);
         
         /**Create a new commit while saving the currentHead commit as the parent. */
         Commit newCommit = new Commit(System.currentTimeMillis(), message,
@@ -117,8 +179,7 @@ public class CommandInterpreter {
         /**Creating the new directory inside objects directory and write the commit to it. */
         File Commit = new File(".gitlet/objects", newCommit._id);
         Commit.mkdir();
-        GitletRepo gt3 = new GitletRepo(".gitlet/objects/" + newCommit._id + "/" + newCommit._id);
-        gt3.writeCommit(newCommit);
+        // GitletRepo gt3 = new GitletRepo(".gitlet/objects/" + newCommit._id + "/" + newCommit._id);
 
         for (File file : _stagedFiles) {
             /**updating the headPointers of the newCommit. */
@@ -128,6 +189,7 @@ public class CommandInterpreter {
             byte[] contents = Utils.readContents(file);
             Utils.writeContents(newFile, contents);
         }
+        GitletRepo.writeCommit(newCommit);
 
         for (File file : _stagedFiles) {
             file.delete();
@@ -140,7 +202,8 @@ public class CommandInterpreter {
     /** The command creates .gitlet folder. */
     private void initCommand() throws IOException {
         if (new File(".gitlet").exists()) {
-            System.out.println(".gitlet folder already exists.");
+            System.out.println("A gitlet version-control system already "
+                    + "exists in the current directory.");
             return;
         } else {
             File gitlet = new File(".gitlet");
@@ -158,11 +221,11 @@ public class CommandInterpreter {
             File initialCommit = new File(objects, auto._id);
             initialCommit.mkdir();
 
-            GitletRepo gt = new GitletRepo(".gitlet/objects/" + auto._id + "/" + auto._id);
+           //  GitletRepo gt = new GitletRepo(".gitlet/objects/" + auto._id + "/" + auto._id);
             GitletRepo gt2 = new GitletRepo(".gitlet/refs/branches/master");
             GitletRepo gt3 = new GitletRepo(".gitlet/objects/staging");
             GitletRepo gt4 = new GitletRepo(".gitlet/HEAD");
-            gt.writeCommit(auto);
+            GitletRepo.writeCommit(auto);
             gt2.writeFile(auto._id);
             gt3.writeObject(_staged);
             gt4.writeFile("ref: .gitlet/refs/branches/master");
@@ -174,7 +237,7 @@ public class CommandInterpreter {
     private void addCommand(String fileName) throws IOException, ClassNotFoundException {
         String stagingFileName = ".gitlet/objects/staging";
         if (!new File(fileName).exists()) {
-            System.err.println("File does not exist");
+            System.err.println("File does not exist.");
         } else {
             GitletRepo gt = new GitletRepo(stagingFileName);
             _staged = (ArrayList<File>) gt.readObject();

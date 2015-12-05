@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInput;
@@ -35,35 +36,6 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
         _file = new File(fileName);
         _file.createNewFile();
     }
-    
-    public void createFile(String fileName, String fileText) {
-        File f = new File(fileName);
-        if (!f.exists()) {
-            try {
-                f.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        writeFile(fileName, fileText);
-    }
-    
-    private void writeFile(String fileName, String fileText) {
-        FileWriter fw = null;
-        try {
-            File f = new File(fileName);
-            fw = new FileWriter(f, false);
-            fw.write(fileText);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                fw.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     /** Writes TEXT to _file instance. */
     @Override
@@ -71,22 +43,6 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
         FileWriter writer = new FileWriter(_file);
         writer.write(text);
         writer.close();
-    }
-
-    @SuppressWarnings("resource")
-    public void writeCommit(Commit commit) throws IOException {
-        String directoryString = ".gitlet/objects/" + commit._id;
-        String filename = directoryString + "/" + commit._id;
-        File directory = new File(directoryString);
-        directory.mkdir();
-            OutputStream file = new FileOutputStream(filename);
-            ObjectOutput output = new ObjectOutputStream(file);
-
-            output.writeObject(commit._id);
-            output.writeObject(commit._timeStamp);
-            output.writeObject(commit._logMessage);
-            output.writeObject(commit._filePointers);
-            output.writeObject(commit._parent);
     }
 
     /** Write the file to the outPut. */
@@ -108,6 +64,19 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
     public String getCurrentHeadPointer() throws IOException {
         String head = getText(getCurrentBranchRef());
         return head;
+    }
+    /** Returns the commit IDs of all commits ever made. */
+    public static String[] getAllCommitIds() {
+        File objects = new File(".gitlet/objects");
+        FilenameFilter filter = new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                if("staging".equals(name) || "stagedFiles".equals(name))
+                    return false;
+                return true;
+            }
+        };
+        return objects.list(filter);
     }
     /** Delete branches. */
     public void deleteBranches() {
@@ -145,9 +114,25 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
     public String getWorkingDirectory() {
         return System.getProperty("user.dir");
     }
+
+    @SuppressWarnings("resource")
+    public static void writeCommit(Commit commit) throws IOException {
+        String directoryString = ".gitlet/objects/" + commit._id;
+        String filename = directoryString + "/" + commit._id;
+        File directory = new File(directoryString);
+        directory.mkdir();
+            OutputStream file = new FileOutputStream(filename);
+            ObjectOutput output = new ObjectOutputStream(file);
+
+            output.writeObject(commit._id);
+            output.writeObject(commit._timeStamp);
+            output.writeObject(commit._logMessage);
+            output.writeObject(commit._filePointers);
+            output.writeObject(commit._parent);
+    }
     /** Return a commit recovered from COMMITID. */
     @SuppressWarnings({ "resource", "unchecked" })
-    public Commit readCommit(String commitID) throws IOException, ClassNotFoundException {
+    public static Commit readCommit(String commitID) throws IOException, ClassNotFoundException {
         String objDir = ".gitlet/objects/" + commitID;
         File d = new File(objDir);
 
@@ -165,7 +150,9 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
             String Id = (String) input.readObject();
             Long timeStamp = (Long) input.readObject();
             String message = (String) input.readObject();
+          
             ArrayList<String> filePointers = (ArrayList<String>) input.readObject();
+            //System.out.println(filePointers);
             String parent = (String) input.readObject();
             recovered = new Commit(timeStamp, message, filePointers, parent);
             return recovered;
