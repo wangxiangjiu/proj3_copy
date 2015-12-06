@@ -23,7 +23,7 @@ import java.util.List;
  * Commits Staging, etc.
  */
 @SuppressWarnings("serial")
-public class GitletRepo implements GitletRepoHeader, Serializable {
+public class GitletRepo implements Serializable {
 
     /** File being written to or read from .*/
     private File _file;
@@ -40,7 +40,6 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
     }
 
     /** Writes TEXT to _file instance. */
-    @Override
     public void writeFile(String text) throws IOException {
         FileWriter writer = new FileWriter(_file);
         writer.write(text);
@@ -48,7 +47,6 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
     }
 
     /** Write the file to the outPut. */
-    @SuppressWarnings("resource")
     public void writeObject(Object obj, ObjectOutput output) throws IOException {
         output.writeObject(obj);
     }
@@ -150,7 +148,7 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
         return new String(Utils.readContents(file));
     }
     /** Returns STRING representing the working directory. */
-    public String getWorkingDirectory() {
+    public static String getWorkingDirectory() {
         return System.getProperty("user.dir");
     }
 
@@ -201,4 +199,16 @@ public class GitletRepo implements GitletRepoHeader, Serializable {
             return null;
         }
     }
+
+//    public String getBranchHead(String branch) {
+//        String path = ".gitlet/refs/heads/" + branch;
+//        String head = getText(path);
+//        return head;
+//    }
+//
+//    public void makeBranchHead(String branch) {
+//        String path = ".gitlet/refs/heads/" + branch;
+//        if (exists(path))
+//            createFile(".gitlet/HEAD", "ref: " + path);
+//    }
 }
