@@ -117,6 +117,7 @@ public class CommandInterpreter {
         
         String branch =  ".gitlet/refs/branches/" + GitletRepo.getCurrentBranch();
         File branchFile = new File(branch);
+        System.out.println(branchFile.getPath());
         Utils.writeContents(branchFile, commitID.getBytes());
         // old spot//
         //System.out.println(currentCommit._filePointers + " " + currentCommit._id);

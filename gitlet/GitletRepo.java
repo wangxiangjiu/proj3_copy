@@ -204,7 +204,7 @@ public class GitletRepo implements Serializable {
     public static boolean unTracked(Commit currentCommit) {
         List<String> workingFileNames = Utils.plainFilenamesIn(GitletRepo.getWorkingDirectory());
         for (String fileName: workingFileNames) {
-            String a = ".[a-zA-Z]*";
+            String a = ".[a-zA-Z]*_[a-zA-Z]*";
             if (Pattern.matches(a, fileName)) {
                 /** Do nothing.*/
             } else if (!currentCommit._filePointers.contains(fileName)) {
