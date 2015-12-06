@@ -153,6 +153,21 @@ public class CommandInterpreter {
         Utils.writeContents(file, contents.getBytes());
         System.out.println(currentCommit._filePointers + " " + currentCommit._id);
         for (String fileName : currentCommit._filePointers) {
+            Commit iter = currentCommit;
+            while (iter._parent != null) {
+                try {
+                    File commitFile = new File(".gitlet/objects/" + currentCommitID + "/" + fileName);
+                    
+                    String workingDirectory = GitletRepo.getWorkingDirectory();
+                    File newfile = new File(workingDirectory + "/" + fileName);
+                    System.out.println(commitFile.getPath());
+                    System.out.println(commitFile.isFile() + " " + commitFile.getName());
+                    Utils.writeContents(newfile, Utils.readContents(commitFile));
+                } catch (IllegalArgumentException e) {
+                    String newIter = iter._parent;
+                    iter = GitletRepo.
+                }
+            }
             //System.out.println(fileName);
             File commitFile = new File(".gitlet/objects/" + currentCommitID + "/" + fileName);
             
@@ -274,7 +289,7 @@ public class CommandInterpreter {
 
         while (head._parent != null) {
             System.out.println("===");
-            System.out.println("Commit " + head._id + ".");
+            System.out.println("Commit " + head._id);
             Date date1 = new Date(head._timeStamp);
             Format format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String date = format.format(date1);
@@ -285,7 +300,7 @@ public class CommandInterpreter {
         }
 
         System.out.println("===");
-        System.out.println("Commit " + head._id + ".");
+        System.out.println("Commit " + head._id);
         Date date1 = new Date(head._timeStamp);
         Format format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String date = format.format(date1);
