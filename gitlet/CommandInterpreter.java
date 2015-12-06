@@ -186,12 +186,7 @@ public class CommandInterpreter {
             System.out.println("No such branch exists.");
             return;
         }
-
-        String path = ".gitlet/HEAD";
-        String contents = GitletRepo.getText(path).replace(GitletRepo.getCurrentBranch(),
-                branchName);
-        File file = new File(path);
-        Utils.writeContents(file, contents.getBytes());// New spot
+// New spot
 
         String currentCommitID = GitletRepo.getCurrentHeadPointer();
         Commit currentCommit = GitletRepo.readCommit(currentCommitID);
@@ -200,6 +195,11 @@ public class CommandInterpreter {
             return;
         }
         
+        String path = ".gitlet/HEAD";
+        String contents = GitletRepo.getText(path).replace(GitletRepo.getCurrentBranch(),branchName);
+        File file = new File(path);
+        Utils.writeContents(file, contents.getBytes());
+
         // old spot//
         System.out.println(currentCommit._filePointers + " " + currentCommit._id);
         for (String fileName : currentCommit._filePointers) {
@@ -217,6 +217,7 @@ public class CommandInterpreter {
                     return;
                 } catch (IllegalArgumentException e) {
                     /** Do nothing. */
+                    System.out.println(newfile.getPath());
                     newfile.delete();
                     String newIter = iter._parent;
                     iter = GitletRepo.readCommit(newIter);
