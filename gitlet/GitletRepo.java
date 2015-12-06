@@ -17,6 +17,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * The over-arching class that has all helper methods. Enables access to all
@@ -199,6 +200,21 @@ public class GitletRepo implements Serializable {
             return null;
         }
     }
+
+    public static boolean unTracked(Commit currentCommit) {
+        List<String> workingFileNames = Utils.plainFilenamesIn(GitletRepo.getWorkingDirectory());
+        for (String fileName: workingFileNames) {
+            String a = ".[a-zA-Z]*";
+            if (Pattern.matches(a, fileName)) {
+                /** Do nothing.*/
+            } else if (!currentCommit._filePointers.contains(fileName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+
 
 //    public String getBranchHead(String branch) {
 //        String path = ".gitlet/refs/heads/" + branch;

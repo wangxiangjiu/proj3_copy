@@ -80,6 +80,7 @@ class Utils {
      *  file.  Throws IllegalArgumentException in case of problems. */
     static byte[] readContents(File file) {
         if (!file.isFile()) {
+            System.out.println(file.isFile() + " " + file.getName());
             throw new IllegalArgumentException("must be a normal file");
         }
         try {
