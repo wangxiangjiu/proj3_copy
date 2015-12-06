@@ -88,6 +88,7 @@ public class CommandInterpreter {
             _dangerous = false;
             break;
         case "reset":
+            reset(args[1]);
             _dangerous = true;
             break;
         case "merge":
@@ -95,6 +96,49 @@ public class CommandInterpreter {
             break;
         default:
             throw new Error("unrecognizable command");
+        }
+    }
+    /** Resets to COMMITSTRING and moves head to 
+      * that commit. */
+    private void reset(String commitID) throws IOException, ClassNotFoundException {
+        String directory = ".gitlet/objects/" + commitID;
+        File commitDirectory = new File(directory);
+        if (!commitDirectory.exists()) {
+            System.out.println("No commit with that id exists.");
+            return;
+        }
+        
+        String currentCommitID = GitletRepo.getCurrentHeadPointer();
+        Commit currentCommit = GitletRepo.readCommit(currentCommitID);
+        if (GitletRepo.unTracked(currentCommit)) {
+            System.out.println("There is an untracked file in the way; delete it or add it first.");
+            return;
+        }
+        
+        // old spot//
+        System.out.println(currentCommit._filePointers + " " + currentCommit._id);
+        for (String fileName : currentCommit._filePointers) {
+            Commit iter = currentCommit;
+            while (iter._parent != null) {
+                File newfile = null;
+                try {
+                    File commitFile = new File(".gitlet/objects/" + iter._id + "/" + fileName);
+                    
+                    String workingDirectory = GitletRepo.getWorkingDirectory();
+                    newfile = new File(workingDirectory + "/" + fileName);
+                    System.out.println(commitFile.getPath());
+                    System.out.println(commitFile.isFile() + " " + commitFile.getName());
+                    Utils.writeContents(newfile, Utils.readContents(commitFile));
+                    return;
+                } catch (IllegalArgumentException e) {
+                    /** Do nothing. */
+                    newfile.delete();
+                    String newIter = iter._parent;
+                    iter = GitletRepo.readCommit(newIter);
+                    System.out.println(iter._id);
+
+                }
+            }
         }
     }
 
@@ -158,21 +202,24 @@ public class CommandInterpreter {
         for (String fileName : currentCommit._filePointers) {
             Commit iter = currentCommit;
             while (iter._parent != null) {
+                File newfile = null;
                 try {
                     File commitFile = new File(".gitlet/objects/" + iter._id + "/" + fileName);
                     
                     String workingDirectory = GitletRepo.getWorkingDirectory();
-                    File newfile = new File(workingDirectory + "/" + fileName);
+                    newfile = new File(workingDirectory + "/" + fileName);
                     System.out.println(commitFile.getPath());
                     System.out.println(commitFile.isFile() + " " + commitFile.getName());
                     Utils.writeContents(newfile, Utils.readContents(commitFile));
                     return;
                 } catch (IllegalArgumentException e) {
                     /** Do nothing. */
+                    newfile.delete();
+                    String newIter = iter._parent;
+                    iter = GitletRepo.readCommit(newIter);
+                    System.out.println(iter._id);
+
                 }
-                String newIter = iter._parent;
-                iter = GitletRepo.readCommit(newIter);
-                System.out.println(iter._id);
             }
         }
     }
