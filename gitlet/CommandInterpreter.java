@@ -107,16 +107,19 @@ public class CommandInterpreter {
             System.out.println("No commit with that id exists.");
             return;
         }
-        
-        String currentCommitID = GitletRepo.getCurrentHeadPointer();
-        Commit currentCommit = GitletRepo.readCommit(currentCommitID);
+
+        //String currentCommitID = GitletRepo.getCurrentHeadPointer();
+        Commit currentCommit = GitletRepo.readCommit(commitID);
         if (GitletRepo.unTracked(currentCommit)) {
             System.out.println("There is an untracked file in the way; delete it or add it first.");
             return;
         }
         
+        String branch =  ".gitlet/refs/branches/" + GitletRepo.getCurrentBranch();
+        File branchFile = new File(branch);
+        Utils.writeContents(branchFile, commitID.getBytes());
         // old spot//
-        System.out.println(currentCommit._filePointers + " " + currentCommit._id);
+        //System.out.println(currentCommit._filePointers + " " + currentCommit._id);
         for (String fileName : currentCommit._filePointers) {
             Commit iter = currentCommit;
             while (iter._parent != null) {
