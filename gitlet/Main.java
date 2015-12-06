@@ -27,18 +27,6 @@ public class Main {
         }
 
         CommandInterpreter cp = new CommandInterpreter(args);
-//        if (cp._dangerous) {
-//            System.out.println("Warning: The command you entered my alter the files "
-//                    + "in your owrking directory. Uncomitted changes may be lost. "
-//                    + "Are you srue you want to continue? (yes/no)");
-//            Scanner stdin = new Scanner(System.in);
-//            String answer = stdin.nextLine();
-//            if(!"yes".equals(answer)) {
-//                cp.canExecute = false;
-//            return;
-////            stdin.close();
-//            }
-//        }
         
 //        if (cp.canExecute) {
 //            command.execute();
