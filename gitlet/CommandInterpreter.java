@@ -316,7 +316,7 @@ public class CommandInterpreter {
         for (String id : GitletRepo.getAllCommitIds()) {
             Commit head = GitletRepo.readCommit(id);
             System.out.println("====");
-            System.out.println("Commit " + head._id + ".");
+            System.out.println("Commit " + head._id);
             Date date1 = new Date(head._timeStamp);
             Format format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String date = format.format(date1);
