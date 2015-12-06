@@ -201,17 +201,23 @@ public class GitletRepo implements Serializable {
         }
     }
 
-    public static boolean unTracked(Commit currentCommit) {
+    public static List<String> unTracked(Commit currentCommit) {
         List<String> workingFileNames = Utils.plainFilenamesIn(GitletRepo.getWorkingDirectory());
+        System.out.println("current files:         " + currentCommit._filePointers);
+        System.out.println("working files:         " + workingFileNames);
+        ArrayList<String> untrackedFiles = new ArrayList<String>();
         for (String fileName: workingFileNames) {
-            String a = ".[a-zA-Z]*_[a-zA-Z]*";
+            System.out.println("file considered: " + fileName);
+            String a = "[.][a-zA-Z]*";
             if (Pattern.matches(a, fileName)) {
+                System.out.println("matched pattern: " + fileName);
                 /** Do nothing.*/
             } else if (!currentCommit._filePointers.contains(fileName)) {
-                return true;
+                System.out.println("file " + fileName + " is untracked");
+                untrackedFiles.add(fileName);
             }
         }
-        return false;
+        return untrackedFiles;
     }
     
 
