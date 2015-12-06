@@ -3,6 +3,7 @@ package gitlet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * Driver class for Gitlet, the tiny stupid version-control system.
@@ -26,18 +27,22 @@ public class Main {
         }
 
         CommandInterpreter cp = new CommandInterpreter(args);
-
-//        if (cp.statement(args)) {
-//            CommandInterface c = cp.getCommand(args[0]);
-//            if (c.isDangerous()) {
-//                System.out.println("Warning: The command you entered my alter the files "
-//                        + "in your owrking directory. Uncomitted changes may be lost. "
-//                        + "Are you srue you want to continue? (yes/no)");
-//            }
-//        } else {
-//
+        if (cp._dangerous) {
+            System.out.println("Warning: The command you entered my alter the files "
+                    + "in your owrking directory. Uncomitted changes may be lost. "
+                    + "Are you srue you want to continue? (yes/no)");
+            Scanner stdin = new Scanner(System.in);
+            String answer = stdin.nextLine();
+            if(!"yes".equals(answer)) {
+                cp.canExecute = false;
+            return;
+//            stdin.close();
+            }
+        }
+        
+//        if (cp.canExecute) {
+//            command.execute();
 //        }
-
     }
 
 }

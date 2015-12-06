@@ -24,47 +24,50 @@ public class CommandInterpreter {
     protected String[] _args;
     /** Is true for a dangerous command. */
     protected boolean _dangerous;
+    
+    protected boolean canExecute;
 
     /** Creates a command interpreter with ARGS. */
     public CommandInterpreter(String[] args) throws IOException, ClassNotFoundException {
         _args = args;
         switch (args[0]) {
         case "init":
-            initCommand();
             _dangerous = false;
+            initCommand();
             break;
         case "add":
-            addCommand(args[1]);
             _dangerous = false;
+            addCommand(args[1]);
             break;
         case "commit":
+            _dangerous = false;
             try {
             commitCommand(args[1]);
             } catch (IndexOutOfBoundsException e) {
                 System.out.println("Please enter a commit message.");
                 return;
             }
-            _dangerous = false;
             break;
         case "rm":
-            rmCommand(args[1]);
             _dangerous = true;
+            rmCommand(args[1]);
+
             break;
-        case "log":
-            logCommand();
+        case "log":            
             _dangerous = false;
+            logCommand();
             break;
         case "global-log":
-            globLogCommand();
             _dangerous = false;
+            globLogCommand();
             break;
         case "find":
             _dangerous = false;
             findCommand(args[1]);
             break;
-        case "status":
-            statusCommand();
+        case "status":            
             _dangerous = false;
+            statusCommand();
             break;
         case "checkout":
             switch (args.length) {
@@ -80,28 +83,75 @@ public class CommandInterpreter {
             _dangerous = true;
             break;
         case "branch":
-            branchCommand(args[1]);
             _dangerous = false;
+            branchCommand(args[1]);
             break;
         case "rm-branch":
-            rmBranch(args[1]);
             _dangerous = false;
+            rmBranch(args[1]);
             break;
         case "reset":
-            reset(args[1]);
             _dangerous = true;
+            reset(args[1]);
             break;
         case "merge":
-        	merge(args[1]);
             _dangerous = true;
+        	merge(args[1]);
             break;
         default:
             throw new Error("unrecognizable command");
         }
     }
-    /** Merges files from the given branch into the current branch. */
-    private void merge(String branchName) {
-		// TODO Auto-generated method stub
+    /** Merges files from the given branch into the current branch. 
+     * @throws IOException 
+     * @throws ClassNotFoundException */
+    private void merge(String branchName) throws IOException, ClassNotFoundException {
+		if (!_addedFileNames.isEmpty() || !_removedFileNames.isEmpty()) {
+		    System.out.println("You have uncommitted changes.");
+		    return;
+		}
+		if (Arrays.asList(GitletRepo.getAllBranches()).contains(branchName)) {
+		    System.out.println("A branch with that name does not exist.");
+		    return;
+		}
+		if (GitletRepo.getCurrentBranch().equals(branchName)) {
+		    System.out.println("Cannot merge a branch with itself.");
+		    return;
+		}
+		String currentCommitID = GitletRepo.getCurrentHeadPointer();
+        Commit currentCommit = GitletRepo.readCommit(currentCommitID);
+		if (GitletRepo.unTracked(currentCommit)) {
+            System.out.println("There is an untracked file in the way; delete it or add it first.");
+            return;
+        }
+		try {
+		    Commit current = GitletRepo.readCommit(GitletRepo.getCurrentHeadPointer());
+		    Commit other = GitletRepo.readCommit(GitletRepo.getBranchHead(branchName));
+		    Commit split = GitletRepo.readCommit(current.findSplitPoint(other));
+		    
+		    List<String> currentMod = new ArrayList<String>();
+		    List<String> otherMod = new ArrayList<String>();
+		    
+		    ArrayList<String> currentFP = current._filePointers;
+		    ArrayList<String> otherFP = other._filePointers;
+		    ArrayList<String> splitFP = split._filePointers;
+		    
+		    if (split._id.equals(other._id)) {
+		        System.out.println("Given branch is a ancestor of the current branch.");
+		    }
+		    if (split._id.equals(current._id)) {
+		        System.out.println("Current branch fast-forwarded.");
+		    }
+		    for (String fileName: currentFP) {
+//		        String fileComit = currentFP.(file);
+		        if (!fileName.equals(current._id)) {
+		            currentMod.add(fileName);
+		        }
+		    }
+		} catch (Error e) {
+		    return;
+		}
+		
 		
 	}
 	/** Resets to COMMITSTRING and moves head to 
@@ -151,7 +201,7 @@ public class CommandInterpreter {
             }
         }
     }
-
+    /***/
     private void rmBranch(String branchName) throws IOException {
         if (branchName.equals(GitletRepo.getCurrentBranch())) {
             System.out.println("Cannot remove the current branch.");
@@ -165,7 +215,7 @@ public class CommandInterpreter {
         File file = new File(path);
         file.delete();
     }
-
+    /***/
     private void checkOutIdFileName(String commitID, String fileName) {
         String directory = ".gitlet/objects/" + commitID;
         File commitDirectory = new File(directory);

@@ -1,5 +1,6 @@
 package gitlet;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,28 +53,28 @@ public class Commit implements Serializable {
     /** The equals method checks if two commit OBJ is the same. */
     @Override
     public boolean equals(Object obj) {
+        if(obj instanceof Commit){
+            Commit other = (Commit) obj;
+            return this.hashCode() == other.hashCode();
+        }
         return false;
     }
 
     /** The hashCode of commit. */
     @Override
     public int hashCode() {
-        return 3;
+        return Integer.parseInt(this._id);
     }
 
-    public String findSplitPoint(Commit other) {
-
+    public String findSplitPoint(Commit other) throws ClassNotFoundException, IOException {
         if (other == null)
             return null;
-
         if (this.equals(other))
             return this._id;
-        return _briefId;
-
-//        if (this._timeStamp >= other._timeStamp)
-//            return other.findSplitPoint(this._parent);
-//        else
-//            return this.findSplitPoint(other._parent);
+        if (this._timeStamp >= other._timeStamp)
+            return other.findSplitPoint(GitletRepo.readCommit(this._parent));
+        else
+            return this.findSplitPoint(GitletRepo.readCommit(other._parent));
     }
 
 }

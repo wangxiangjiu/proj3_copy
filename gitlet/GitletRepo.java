@@ -214,17 +214,10 @@ public class GitletRepo implements Serializable {
         return false;
     }
     
-
-
-//    public String getBranchHead(String branch) {
-//        String path = ".gitlet/refs/heads/" + branch;
-//        String head = getText(path);
-//        return head;
-//    }
-//
-//    public void makeBranchHead(String branch) {
-//        String path = ".gitlet/refs/heads/" + branch;
-//        if (exists(path))
-//            createFile(".gitlet/HEAD", "ref: " + path);
-//    }
+    /**Get the head commitId associated with the BRANCH.*/
+    public static String getBranchHead(String branch) throws IOException {
+        String path = ".gitlet/refs/heads/" + branch;
+        String head = getText(path);
+        return head;
+    }
 }
