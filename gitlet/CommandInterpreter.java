@@ -120,7 +120,8 @@ public class CommandInterpreter {
 		}
 		String currentCommitID = GitletRepo.getCurrentHeadPointer();
         Commit currentCommit = GitletRepo.readCommit(currentCommitID);
-		if (GitletRepo.unTracked(currentCommit)) {
+        List<String> list = GitletRepo.unTracked(currentCommit);
+		if (list.size() > 0) {
             System.out.println("There is an untracked file in the way; delete it or add it first.");
             return;
         }
