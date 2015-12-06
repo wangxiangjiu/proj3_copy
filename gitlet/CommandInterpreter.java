@@ -166,7 +166,8 @@ public class CommandInterpreter {
 
         //String currentCommitID = GitletRepo.getCurrentHeadPointer();
         Commit currentCommit = GitletRepo.readCommit(commitID);
-        if (GitletRepo.unTracked(currentCommit)) {
+        List<String> untrackedFiles = GitletRepo.unTracked(currentCommit);
+        if (untrackedFiles.size() > 0) {
             System.out.println("There is an untracked file in the way; delete it or add it first.");
             return;
         }
@@ -247,41 +248,70 @@ public class CommandInterpreter {
 
         String currentCommitID = GitletRepo.getCurrentHeadPointer();
         Commit currentCommit = GitletRepo.readCommit(currentCommitID);
-        if (GitletRepo.unTracked(currentCommit)) {
+        System.out.println("current commit: " + currentCommitID);
+        List<String> untrackedStrings = GitletRepo.unTracked(currentCommit);
+        if (untrackedStrings.size() > 0) {
             System.out.println("There is an untracked file in the way; delete it or add it first.");
+            //String newbranch = GitletRepo.getCurrentBranch();
+            //String newcontents = GitletRepo.getText(path).replace(newbranch, currentBranch);
+            //File newfile = new File(path);
+            //Utils.writeContents(newfile, newcontents.getBytes());
             return;
         }
-        
+
         String path = ".gitlet/HEAD";
-        String contents = GitletRepo.getText(path).replace(GitletRepo.getCurrentBranch(),branchName);
+        String currentBranch = GitletRepo.getCurrentBranch();
+        String contents = GitletRepo.getText(path).replace(currentBranch,branchName);
         File file = new File(path);
         Utils.writeContents(file, contents.getBytes());
-
+        
+        currentCommitID = GitletRepo.getCurrentHeadPointer();
+        currentCommit = GitletRepo.readCommit(currentCommitID);
         // old spot//
-        System.out.println(currentCommit._filePointers + " " + currentCommit._id);
+        //System.out.println(currentCommit._filePointers + " " + currentCommit._id);
+        //while (iter._parent != null) {
         for (String fileName : currentCommit._filePointers) {
             Commit iter = currentCommit;
-            while (iter._parent != null) {
-                File newfile = null;
-                try {
-                    File commitFile = new File(".gitlet/objects/" + iter._id + "/" + fileName);
+            File commitFile = new File(".gitlet/objects/" + iter._id + "/" + fileName);
+            System.out.println("commit  file " + commitFile.getName() + " exists in  " + iter._id+ " " + commitFile.exists());
+            while (!commitFile.exists()) {
+                iter = GitletRepo.readCommit(iter._parent);
+                commitFile = new File(".gitlet/objects/" + iter._id + "/" + fileName);
+                System.out.println("trying to find: " + commitFile.getName() + " " + iter);
+            }
+
+
+
+                System.out.println(GitletRepo.getCurrentBranch() + " " + fileName + " " + iter._id);
+                //File newfile = null;
+                //try {
+                    //File commitFile = new File(".gitlet/objects/" + iter._id + "/" + fileName);
                     
                     String workingDirectory = GitletRepo.getWorkingDirectory();
-                    newfile = new File(workingDirectory + "/" + fileName);
-                    System.out.println(commitFile.getPath());
-                    System.out.println(commitFile.isFile() + " " + commitFile.getName());
+                    File newfile = new File(workingDirectory + "/" + fileName);
+                    /***/
+                    //if (newfile.exists()) {
+                    //    Utils.writeContents(newfile, Utils.readContents(commitFile));
+                    //    break;
+                    //}
+                    Utils.readContents(commitFile);
                     Utils.writeContents(newfile, Utils.readContents(commitFile));
-                    return;
-                } catch (IllegalArgumentException e) {
+                //} catch (IllegalArgumentException e) {
                     /** Do nothing. */
-                    System.out.println(newfile.getPath());
-                    newfile.delete();
-                    String newIter = iter._parent;
-                    iter = GitletRepo.readCommit(newIter);
-                    System.out.println(iter._id);
+                  //  System.out.println("file  to be deleted:                " + newfile.getPath());
+                    //newfile.delete();
+                    //String newIter = iter._parent;
+                    //iter = GitletRepo.readCommit(newIter);
+                  //  System.out.println(iter._id);
 
-                }
-            }
+                //}
+            //}
+        }
+        untrackedStrings = GitletRepo.unTracked(currentCommit);
+        System.out.println("untracked in new branch: " + untrackedStrings);
+        for (String fileString: untrackedStrings) {
+            File fileD = new File(GitletRepo.getWorkingDirectory() + "/" + fileString);
+            fileD.delete();
         }
     }
 
@@ -503,6 +533,7 @@ public class CommandInterpreter {
         // "/" + newCommit._id);
 
         for (File file : stagedFiles) {
+            System.out.println("commmited file: " + file.getName());
             /** updating the headPointers of the newCommit. */
             newCommit._filePointers.add(file.getName());
             File newFile = new File(Commit, file.getName());
