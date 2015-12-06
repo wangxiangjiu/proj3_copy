@@ -92,13 +92,19 @@ public class CommandInterpreter {
             _dangerous = true;
             break;
         case "merge":
+        	merge(args[1]);
             _dangerous = true;
             break;
         default:
             throw new Error("unrecognizable command");
         }
     }
-    /** Resets to COMMITSTRING and moves head to 
+    /** Merges files from the given branch into the current branch. */
+    private void merge(String branchName) {
+		// TODO Auto-generated method stub
+		
+	}
+	/** Resets to COMMITSTRING and moves head to 
       * that commit. */
     private void reset(String commitID) throws IOException, ClassNotFoundException {
         String directory = ".gitlet/objects/" + commitID;
