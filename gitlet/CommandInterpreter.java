@@ -106,6 +106,7 @@ public class CommandInterpreter {
     /** Merges files from the given BRANCHNAME into the current branch. 
      * @throws IOException 
      * @throws ClassNotFoundException */
+    @SuppressWarnings("unchecked")
     private void merge(String branchName) throws IOException, ClassNotFoundException {
 		if (!_addedFileNames.isEmpty() || !_removedFileNames.isEmpty()) {
 		    System.out.println("You have uncommitted changes.");
@@ -182,6 +183,13 @@ public class CommandInterpreter {
                 }
 		    }
 		    
+		    GitletRepo gt = new GitletRepo(".gitlet/objects/staging");
+		    ObjectInput oi = gt.createInputStream();
+		    ObjectOutput oo = gt.createOutputStream();
+		    _staged = (List<File>) gt.readObject(oi);
+		    _removedFileNames = (List<String>) gt.readObject(oi);
+		    _addedFileNames = (List<String>) gt.readObject(oi);
+		    
 		    for (String fileName : otherMod.keySet()) {
 		        //String commitID = getIDFromFileName(fileName, other);
 		        if (currentMod.values().contains(fileName)) {
@@ -192,13 +200,15 @@ public class CommandInterpreter {
 		            if (!Arrays.equals(currFContents, othFContents)) {
 		                String workingDirePath = GitletRepo.getWorkingDirectory() + "/" + fileName;
 		                File file2 = new File(workingDirePath);
-		                
+		                _staged.add(file2);
+		                _addedFileNames.add(fileName);
 		                Utils.writeContents(file2, othFContents);
 		            }
 		        }
 		    }
-		    
-		    
+		    gt.writeObject(_staged, oo);
+            gt.writeObject(_removedFileNames, oo);
+            gt.writeObject(_addedFileNames, oo);
 		} catch (Error e) {
 		    return;
 		}
