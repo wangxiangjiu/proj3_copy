@@ -222,7 +222,7 @@ public class GitletRepo implements Serializable {
     
     /**Get the head commitId associated with the BRANCH.*/
     public static String getBranchHead(String branch) throws IOException {
-        String path = ".gitlet/refs/heads/" + branch;
+        String path = ".gitlet/refs/branches/" + branch;
         String head = getText(path);
         return head;
     }
