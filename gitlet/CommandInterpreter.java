@@ -140,9 +140,15 @@ public class CommandInterpreter {
 		    
 		    if (split._id.equals(other._id)) {
 		        System.out.println("Given branch is a ancestor of the current branch.");
+		        return;
 		    }
 		    if (split._id.equals(current._id)) {
+		        String commitID = GitletRepo.getBranchHead(branchName);
+		        String path = ".gitlet/refs/branches" + GitletRepo.getCurrentBranch();
+		        File file = new File(path);
+		        Utils.writeContents(file, commitID.getBytes());
 		        System.out.println("Current branch fast-forwarded.");
+		        return;
 		    }
 		    
 		    //iterate through filePointers, save files that have changed in either commit
@@ -154,6 +160,19 @@ public class CommandInterpreter {
 		        if (!fileCommit.equals(splitCommit)) {
 		            currentMod.add(fileName);
 		        }
+		    }
+		    
+		    for (String fileName: otherFP) {
+		        String fileCommit = getIDFromFileName(fileName, other);
+                String splitCommit = getIDFromFileName(fileName, split);
+                
+                if (!fileCommit.equals(splitCommit)) {
+                    otherMod.add(fileName);
+                }
+		    }
+		    
+		    for (String fileName : otherMod) {
+		        String commitID = getIDFromFileName(fileName, other);
 		    }
 		    
 		    
