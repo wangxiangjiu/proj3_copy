@@ -50,26 +50,10 @@ public class Commit implements Serializable {
         _briefId = _id.substring(0, 5);
     }
 
-    /** The equals method checks if two commit OBJ is the same. */
-    @Override
-    public boolean equals(Object obj) {
-        if(obj instanceof Commit){
-            Commit other = (Commit) obj;
-            return this.hashCode() == other.hashCode();
-        }
-        return false;
-    }
-
-    /** The hashCode of commit. */
-    @Override
-    public int hashCode() {
-        return Integer.parseInt(this._id);
-    }
-
     public String findSplitPoint(Commit other) throws ClassNotFoundException, IOException {
         if (other == null)
             return null;
-        if (this.equals(other))
+        if (_id.equals(other._id))
             return this._id;
         if (this._timeStamp >= other._timeStamp)
             return other.findSplitPoint(GitletRepo.readCommit(this._parent));

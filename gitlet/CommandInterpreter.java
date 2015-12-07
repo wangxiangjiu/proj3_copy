@@ -110,7 +110,7 @@ public class CommandInterpreter {
 		    System.out.println("You have uncommitted changes.");
 		    return;
 		}
-		if (Arrays.asList(GitletRepo.getAllBranches()).contains(branchName)) {
+		if (!Arrays.asList(GitletRepo.getAllBranches()).contains(branchName)) {
 		    System.out.println("A branch with that name does not exist.");
 		    return;
 		}
@@ -127,6 +127,7 @@ public class CommandInterpreter {
         }
 		try {
 		    Commit current = GitletRepo.readCommit(GitletRepo.getCurrentHeadPointer());
+            GitletRepo.getBranchHead(branchName);
 		    Commit other = GitletRepo.readCommit(GitletRepo.getBranchHead(branchName));
 		    Commit split = GitletRepo.readCommit(current.findSplitPoint(other));
 		    
