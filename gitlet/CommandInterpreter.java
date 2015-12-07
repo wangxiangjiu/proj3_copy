@@ -102,7 +102,7 @@ public class CommandInterpreter {
             throw new Error("unrecognizable command");
         }
     }
-    /** Merges files from the given branch into the current branch. 
+    /** Merges files from the given BRANCHNAME into the current branch. 
      * @throws IOException 
      * @throws ClassNotFoundException */
     private void merge(String branchName) throws IOException, ClassNotFoundException {
@@ -143,18 +143,33 @@ public class CommandInterpreter {
 		    if (split._id.equals(current._id)) {
 		        System.out.println("Current branch fast-forwarded.");
 		    }
+		    
+		    //iterate through filePointers, save files that have changed in either commit
+	        //since split
 		    for (String fileName: currentFP) {
-//		        String fileComit = currentFP.(file);
-		        if (!fileName.equals(current._id)) {
+		        String fileCommit = getIDFromFileName(fileName, current);
+		        String splitCommit = getIDFromFileName(fileName, split);
+		        
+		        if (!fileCommit.equals(splitCommit)) {
 		            currentMod.add(fileName);
 		        }
 		    }
+		    
+		    
 		} catch (Error e) {
 		    return;
 		}
-		
-		
 	}
+    
+    public static String getIDFromFileName(String fileName, Commit commit) throws ClassNotFoundException, IOException {
+        File commitFile = new File(".gitlet/objects/" + commit._id + "/" + fileName);
+        while (!commitFile.exists()) {
+            commit = GitletRepo.readCommit(commit._parent);
+            commitFile = new File(".gitlet/objects/" + commit._id + "/" + fileName);
+        }
+        return commitFile.getName();
+    }
+    
 	/** Resets to COMMITSTRING and moves head to 
       * that commit. */
     private void reset(String commitID) throws IOException, ClassNotFoundException {
