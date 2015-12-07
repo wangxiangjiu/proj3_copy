@@ -134,4 +134,17 @@ class Utils {
         return plainFilenamesIn(new File(dir));
     }
 
+    public static byte[] readContents(String path) {
+        File file = new File(path);
+        byte[] contents = Utils.readContents(file);
+        return contents;
+    }
+    /**Writing the contents from FILEORIGIN to the FILENAME to the working directory. */
+    public static void writeToWorkingDirectory(String fileName, String fileOrigin) {
+        File file = new File(GitletRepo.getWorkingDirectory() + "/" + fileName);
+        byte[] contents = Utils.readContents(fileOrigin);
+        Utils.writeContents(file, contents);
+        
+    }
+
 }

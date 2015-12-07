@@ -209,7 +209,7 @@ public class GitletRepo implements Serializable {
         for (String fileName: workingFileNames) {
             System.out.println("file considered: " + fileName);
             String a = "[.][a-zA-Z]*";
-            String dsStore = "DS_Store";
+            String dsStore = ".DS_Store";
             if (Pattern.matches(a, fileName) || Pattern.matches(dsStore, fileName)) {
                 System.out.println("matched pattern: " + fileName);
                 /** Do nothing.*/

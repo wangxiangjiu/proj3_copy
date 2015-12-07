@@ -11,6 +11,7 @@ import java.util.List;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 
 /** Command Interpreter for gitlet. */
 public class CommandInterpreter {
@@ -131,8 +132,10 @@ public class CommandInterpreter {
 		    Commit other = GitletRepo.readCommit(GitletRepo.getBranchHead(branchName));
 		    Commit split = GitletRepo.readCommit(current.findSplitPoint(other));
 		    
-		    List<String> currentMod = new ArrayList<String>();
-		    List<String> otherMod = new ArrayList<String>();
+		    //List<String> currentMod = new ArrayList<String>();
+		    //List<String> otherMod = new ArrayList<String>();
+		    HashMap<String, String> currentMod = new HashMap<String, String>();
+		    HashMap<String, String> otherMod = new HashMap<String, String>();
 		    
 		    ArrayList<String> currentFP = current._filePointers;
 		    ArrayList<String> otherFP = other._filePointers;
@@ -143,6 +146,14 @@ public class CommandInterpreter {
 		        return;
 		    }
 		    if (split._id.equals(current._id)) {
+		        for (String fileName: other._filePointers) {
+		            File file = new File(GitletRepo.getWorkingDirectory() + "/" + fileName);
+		            String id = getIDFromFileName(fileName, other);
+		            // System.out.println(id);
+		            File file2 = new File(".gitlet/objects/" + id + "/" + fileName);
+		            byte[] contents = Utils.readContents(file2);
+		            Utils.writeContents(file, contents);
+		        }
 		        String commitID = GitletRepo.getBranchHead(branchName);
 		        String path = ".gitlet/refs/branches" + GitletRepo.getCurrentBranch();
 		        File file = new File(path);
@@ -158,7 +169,7 @@ public class CommandInterpreter {
 		        String splitCommit = getIDFromFileName(fileName, split);
 		        
 		        if (!fileCommit.equals(splitCommit)) {
-		            currentMod.add(fileName);
+		            currentMod.put(fileName, fileCommit);
 		        }
 		    }
 		    
@@ -167,12 +178,24 @@ public class CommandInterpreter {
                 String splitCommit = getIDFromFileName(fileName, split);
                 
                 if (!fileCommit.equals(splitCommit)) {
-                    otherMod.add(fileName);
+                    otherMod.put(fileName, fileCommit);
                 }
 		    }
 		    
-		    for (String fileName : otherMod) {
-		        String commitID = getIDFromFileName(fileName, other);
+		    for (String fileName : otherMod.keySet()) {
+		        //String commitID = getIDFromFileName(fileName, other);
+		        if (currentMod.values().contains(fileName)) {
+		            String path1 = ".gitlet/objects/" + currentMod.get(fileName) + "/" + fileName;
+		            String path2 = ".gitlet/objects/" + otherMod.get(fileName) + "/" + fileName;
+		            byte[] currFContents = Utils.readContents(path1);
+		            byte[] othFContents = Utils.readContents(path2);
+		            if (!Arrays.equals(currFContents, othFContents)) {
+		                String workingDirePath = GitletRepo.getWorkingDirectory() + "/" + fileName;
+		                File file2 = new File(workingDirePath);
+		                
+		                Utils.writeContents(file2, othFContents);
+		            }
+		        }
 		    }
 		    
 		    
@@ -187,7 +210,7 @@ public class CommandInterpreter {
             commit = GitletRepo.readCommit(commit._parent);
             commitFile = new File(".gitlet/objects/" + commit._id + "/" + fileName);
         }
-        return commitFile.getName();
+        return commit._id;
     }
     
 	/** Resets to COMMITSTRING and moves head to 
