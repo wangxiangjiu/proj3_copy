@@ -25,7 +25,7 @@ public class CommandInterpreter {
     protected String[] _args;
     /** Is true for a dangerous command. */
     protected boolean _dangerous;
-    
+
     protected boolean canExecute;
 
     /** Creates a command interpreter with ARGS. */
@@ -43,7 +43,7 @@ public class CommandInterpreter {
         case "commit":
             _dangerous = false;
             try {
-            commitCommand(args[1]);
+                commitCommand(args[1]);
             } catch (IndexOutOfBoundsException e) {
                 System.out.println("Please enter a commit message.");
                 return;
@@ -54,7 +54,7 @@ public class CommandInterpreter {
             rmCommand(args[1]);
 
             break;
-        case "log":            
+        case "log":
             _dangerous = false;
             logCommand();
             break;
@@ -66,7 +66,7 @@ public class CommandInterpreter {
             _dangerous = false;
             findCommand(args[1]);
             break;
-        case "status":            
+        case "status":
             _dangerous = false;
             statusCommand();
             break;
@@ -97,124 +97,149 @@ public class CommandInterpreter {
             break;
         case "merge":
             _dangerous = true;
-        	merge(args[1]);
+            merge(args[1]);
             break;
         default:
             throw new Error("unrecognizable command");
         }
     }
-    /** Merges files from the given BRANCHNAME into the current branch. 
-     * @throws IOException 
-     * @throws ClassNotFoundException */
+
+    /**
+     * Merges files from the given BRANCHNAME into the current branch.
+     * 
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     @SuppressWarnings("unchecked")
     private void merge(String branchName) throws IOException, ClassNotFoundException {
-		if (!_addedFileNames.isEmpty() || !_removedFileNames.isEmpty()) {
-		    System.out.println("You have uncommitted changes.");
-		    return;
-		}
-		if (!Arrays.asList(GitletRepo.getAllBranches()).contains(branchName)) {
-		    System.out.println("A branch with that name does not exist.");
-		    return;
-		}
-		if (GitletRepo.getCurrentBranch().equals(branchName)) {
-		    System.out.println("Cannot merge a branch with itself.");
-		    return;
-		}
-		String currentCommitID = GitletRepo.getCurrentHeadPointer();
+        if (!_addedFileNames.isEmpty() || !_removedFileNames.isEmpty()) {
+            System.out.println("You have uncommitted changes.");
+            return;
+        }
+        if (!Arrays.asList(GitletRepo.getAllBranches()).contains(branchName)) {
+            System.out.println("A branch with that name does not exist.");
+            return;
+        }
+        if (GitletRepo.getCurrentBranch().equals(branchName)) {
+            System.out.println("Cannot merge a branch with itself.");
+            return;
+        }
+        String currentCommitID = GitletRepo.getCurrentHeadPointer();
         Commit currentCommit = GitletRepo.readCommit(currentCommitID);
         List<String> list = GitletRepo.unTracked(currentCommit);
-		if (list.size() > 0) {
+        if (list.size() > 0) {
             System.out.println("There is an untracked file in the way; delete it or add it first.");
             return;
         }
-		try {
-		    Commit current = GitletRepo.readCommit(GitletRepo.getCurrentHeadPointer());
+        try {
+            Commit current = GitletRepo.readCommit(GitletRepo.getCurrentHeadPointer());
             GitletRepo.getBranchHead(branchName);
-		    Commit other = GitletRepo.readCommit(GitletRepo.getBranchHead(branchName));
-		    Commit split = GitletRepo.readCommit(current.findSplitPoint(other));
-		    
-		    //List<String> currentMod = new ArrayList<String>();
-		    //List<String> otherMod = new ArrayList<String>();
-		    HashMap<String, String> currentMod = new HashMap<String, String>();
-		    HashMap<String, String> otherMod = new HashMap<String, String>();
-		    
-		    ArrayList<String> currentFP = current._filePointers;
-		    ArrayList<String> otherFP = other._filePointers;
-		    ArrayList<String> splitFP = split._filePointers;
-		    
-		    if (split._id.equals(other._id)) {
-		        System.out.println("Given branch is a ancestor of the current branch.");
-		        return;
-		    }
-		    if (split._id.equals(current._id)) {
-		        for (String fileName: other._filePointers) {
-		            File file = new File(GitletRepo.getWorkingDirectory() + "/" + fileName);
-		            String id = getIDFromFileName(fileName, other);
-		            // System.out.println(id);
-		            File file2 = new File(".gitlet/objects/" + id + "/" + fileName);
-		            byte[] contents = Utils.readContents(file2);
-		            Utils.writeContents(file, contents);
-		        }
-		        String commitID = GitletRepo.getBranchHead(branchName);
-		        String path = ".gitlet/refs/branches" + GitletRepo.getCurrentBranch();
-		        File file = new File(path);
-		        Utils.writeContents(file, commitID.getBytes());
-		        System.out.println("Current branch fast-forwarded.");
-		        return;
-		    }
-		    
-		    //iterate through filePointers, save files that have changed in either commit
-	        //since split
-		    for (String fileName: currentFP) {
-		        String fileCommit = getIDFromFileName(fileName, current);
-		        String splitCommit = getIDFromFileName(fileName, split);
-		        
-		        if (!fileCommit.equals(splitCommit)) {
-		            currentMod.put(fileName, fileCommit);
-		        }
-		    }
-		    
-		    for (String fileName: otherFP) {
-		        String fileCommit = getIDFromFileName(fileName, other);
-                String splitCommit = getIDFromFileName(fileName, split);
-                
-                if (!fileCommit.equals(splitCommit)) {
-                    otherMod.put(fileName, fileCommit);
+            Commit other = GitletRepo.readCommit(GitletRepo.getBranchHead(branchName));
+            Commit split = GitletRepo.readCommit(current.findSplitPoint(other));
+            System.out.println(split._id);
+
+            HashMap<String, String> currentMod = new HashMap<String, String>();
+            HashMap<String, String> otherMod = new HashMap<String, String>();
+            HashMap<String, String> currentNotMod = new HashMap<String, String>();
+            HashMap<String, String> otherNotMod = new HashMap<String, String>();
+            HashMap<String, String> currentNew = new HashMap<String, String>();
+            HashMap<String, String> otherNew = new HashMap<String, String>();
+
+            ArrayList<String> currentFP = current._filePointers;
+            ArrayList<String> otherFP = other._filePointers;
+            ArrayList<String> splitFP = split._filePointers;
+
+            if (split._id.equals(other._id)) {
+                System.out.println("Given branch is a ancestor of the current branch.");
+                return;
+            }
+            if (split._id.equals(current._id)) {
+                for (String fileName : other._filePointers) {
+                    File file = new File(GitletRepo.getWorkingDirectory() + "/" + fileName);
+                    String id = getIDFromFileName(fileName, other);
+                    File file2 = new File(".gitlet/objects/" + id + "/" + fileName);
+                    byte[] contents = Utils.readContents(file2);
+                    Utils.writeContents(file, contents);
                 }
-		    }
-		    
-		    GitletRepo gt = new GitletRepo(".gitlet/objects/staging");
-		    ObjectInput oi = gt.createInputStream();
-		    ObjectOutput oo = gt.createOutputStream();
-		    _staged = (List<File>) gt.readObject(oi);
-		    _removedFileNames = (List<String>) gt.readObject(oi);
-		    _addedFileNames = (List<String>) gt.readObject(oi);
-		    
-		    for (String fileName : otherMod.keySet()) {
-		        //String commitID = getIDFromFileName(fileName, other);
-		        if (currentMod.values().contains(fileName)) {
-		            String path1 = ".gitlet/objects/" + currentMod.get(fileName) + "/" + fileName;
-		            String path2 = ".gitlet/objects/" + otherMod.get(fileName) + "/" + fileName;
-		            byte[] currFContents = Utils.readContents(path1);
-		            byte[] othFContents = Utils.readContents(path2);
-		            if (!Arrays.equals(currFContents, othFContents)) {
-		                String workingDirePath = GitletRepo.getWorkingDirectory() + "/" + fileName;
-		                File file2 = new File(workingDirePath);
-		                _staged.add(file2);
-		                _addedFileNames.add(fileName);
-		                Utils.writeContents(file2, othFContents);
-		            }
-		        }
-		    }
-		    gt.writeObject(_staged, oo);
+                String commitID = GitletRepo.getBranchHead(branchName);
+                String path = ".gitlet/refs/branches" + GitletRepo.getCurrentBranch();
+                File file = new File(path);
+                Utils.writeContents(file, commitID.getBytes());
+                System.out.println("Current branch fast-forwarded.");
+                return;
+            }
+            
+            for (String fileName : currentFP) {
+                String fileCommit = getIDFromFileName(fileName, current);
+                if (!split._filePointers.contains(fileName)) {
+                    currentNew.put(fileName, fileCommit);
+                } else {
+                    String splitCommit = getIDFromFileName(fileName, split);
+
+                    if (!fileCommit.equals(splitCommit)) {
+                        currentMod.put(fileName, fileCommit);
+                    } else {
+                        currentNotMod.put(fileName, fileCommit);
+                    }
+                }
+            }
+
+            for (String fileName : otherFP) {
+                String fileCommit = getIDFromFileName(fileName, other);
+                if (!split._filePointers.contains(fileName)) {
+                    otherNew.put(fileName, fileCommit);
+                } else {
+                    String splitCommit = getIDFromFileName(fileName, split);
+
+                    if (!fileCommit.equals(splitCommit)) {
+                        otherMod.put(fileName, fileCommit);
+                    } else {
+                        otherNotMod.put(fileName, fileCommit);
+                    }
+                }
+            }
+
+            GitletRepo gt = new GitletRepo(".gitlet/objects/staging");
+            
+            System.out.println("fileNames in other:" + otherMod.keySet());
+            System.out.println("fileNames in current:" + currentMod.keySet());
+            System.out.println("fileNames not in other:" + otherNotMod.keySet());
+            System.out.println("fileNames not in current:" + currentNotMod.keySet());
+
+            for (String fileName : otherMod.keySet()) {
+                if (currentNotMod.keySet().contains(fileName)) {
+                    String path1 = ".gitlet/objects/" + currentNotMod.get(fileName) + "/"
+                            + fileName;
+                    String path2 = ".gitlet/objects/" + otherMod.get(fileName) + "/" + fileName;
+                    byte[] currFContents = Utils.readContents(path1);
+                    byte[] othFContents = Utils.readContents(path2);
+                    if (!Arrays.equals(currFContents, othFContents)) {
+                        String workingDirePath = GitletRepo.getWorkingDirectory() + "/" + fileName;
+                        File file2 = new File(workingDirePath);
+                        _staged.add(file2);
+                        _addedFileNames.add(fileName);
+                        Utils.writeContents(file2, othFContents);
+
+                        File file = new File(GitletRepo.getWorkingDirectory() + "/" + fileName);
+                        byte[] contents = Utils.readContents(file);
+                        File destination = new File(".gitlet/objects/stagedFiles/" + fileName);
+                        Utils.writeContents(destination, contents);
+                    }
+                }
+            }
+            
+            /** adding new files present in the given branch to the working directory and add them to staging. */
+            ObjectOutput oo = gt.createOutputStream();
+            gt.writeObject(_staged, oo);
             gt.writeObject(_removedFileNames, oo);
             gt.writeObject(_addedFileNames, oo);
-		} catch (Error e) {
-		    return;
-		}
-	}
-    
-    public static String getIDFromFileName(String fileName, Commit commit) throws ClassNotFoundException, IOException {
+        } catch (Error e) {
+            return;
+        }
+    }
+
+    public static String getIDFromFileName(String fileName, Commit commit)
+            throws ClassNotFoundException, IOException {
         File commitFile = new File(".gitlet/objects/" + commit._id + "/" + fileName);
         while (!commitFile.exists()) {
             commit = GitletRepo.readCommit(commit._parent);
@@ -222,9 +247,10 @@ public class CommandInterpreter {
         }
         return commit._id;
     }
-    
-	/** Resets to COMMITSTRING and moves head to 
-      * that commit. */
+
+    /**
+     * Resets to COMMITSTRING and moves head to that commit.
+     */
     private void reset(String commitID) throws IOException, ClassNotFoundException {
         String directory = ".gitlet/objects/" + commitID;
         File commitDirectory = new File(directory);
@@ -235,26 +261,27 @@ public class CommandInterpreter {
 
         String currentCommitID = GitletRepo.getCurrentHeadPointer();
         Commit currentCommit = GitletRepo.readCommit(currentCommitID);
-        //System.out.println("current commit: " + currentCommitID);
+        // System.out.println("current commit: " + currentCommitID);
         List<String> untrackedStrings = GitletRepo.unTracked(currentCommit);
         if (untrackedStrings.size() > 0) {
             System.out.println("There is an untracked file in the way; delete it or add it first.");
             return;
         }
-         
-        String branch =  ".gitlet/refs/branches/" + GitletRepo.getCurrentBranch();
+
+        String branch = ".gitlet/refs/branches/" + GitletRepo.getCurrentBranch();
         File branchFile = new File(branch);
-        //System.out.println(branchFile.getPath());
+        // System.out.println(branchFile.getPath());
         Utils.writeContents(branchFile, commitID.getBytes());
 
-        //String path = ".gitlet/HEAD";
-        //String currentBranch = GitletRepo.getCurrentBranch();
-        //String contents = GitletRepo.getText(path).replace(currentBranch,branchName);
-        //File file = new File(path);
-        //Utils.writeContents(file, contents.getBytes());
-        
-        //currentCommitID = GitletRepo.getCurrentHeadPointer();
-        //currentCommit = GitletRepo.readCommit(currentCommitID);
+        // String path = ".gitlet/HEAD";
+        // String currentBranch = GitletRepo.getCurrentBranch();
+        // String contents =
+        // GitletRepo.getText(path).replace(currentBranch,branchName);
+        // File file = new File(path);
+        // Utils.writeContents(file, contents.getBytes());
+
+        // currentCommitID = GitletRepo.getCurrentHeadPointer();
+        // currentCommit = GitletRepo.readCommit(currentCommitID);
         currentCommit = GitletRepo.readCommit(commitID);
         System.out.println(currentCommit._id + "commit files: " + currentCommit._filePointers);
         for (String fileName : currentCommit._filePointers) {
@@ -265,25 +292,26 @@ public class CommandInterpreter {
                 iter = GitletRepo.readCommit(iter._parent);
                 commitFile = new File(".gitlet/objects/" + iter._id + "/" + fileName);
             }
-                    
+
             String workingDirectory = GitletRepo.getWorkingDirectory();
             File newfile = new File(workingDirectory + "/" + fileName);
             Utils.readContents(commitFile);
             Utils.writeContents(newfile, Utils.readContents(commitFile));
         }
-        
+
         untrackedStrings = GitletRepo.unTracked(currentCommit);
-        for (String fileString: untrackedStrings) {
+        for (String fileString : untrackedStrings) {
             File fileD = new File(GitletRepo.getWorkingDirectory() + "/" + fileString);
             fileD.delete();
         }
     }
+
     /***/
     private void rmBranch(String branchName) throws IOException {
         if (branchName.equals(GitletRepo.getCurrentBranch())) {
             System.out.println("Cannot remove the current branch.");
             return;
-        } 
+        }
         if (!Arrays.asList(GitletRepo.getAllBranches()).contains(branchName)) {
             System.out.println("A branch with that name does not exist.");
             return;
@@ -292,6 +320,7 @@ public class CommandInterpreter {
         File file = new File(path);
         file.delete();
     }
+
     /***/
     private void checkOutIdFileName(String commitID, String fileName) {
         String directory = ".gitlet/objects/" + commitID;
@@ -310,6 +339,7 @@ public class CommandInterpreter {
         byte[] contents = Utils.readContents(commitFile);
         Utils.writeContents(file, contents);
     }
+
     /***/
     private void checkOutBranch(String branchName) throws IOException, ClassNotFoundException {
         if (GitletRepo.getCurrentBranch().equals(branchName)) {
@@ -332,10 +362,10 @@ public class CommandInterpreter {
 
         String path = ".gitlet/HEAD";
         String currentBranch = GitletRepo.getCurrentBranch();
-        String contents = GitletRepo.getText(path).replace(currentBranch,branchName);
+        String contents = GitletRepo.getText(path).replace(currentBranch, branchName);
         File file = new File(path);
         Utils.writeContents(file, contents.getBytes());
-        
+
         currentCommitID = GitletRepo.getCurrentHeadPointer();
         currentCommit = GitletRepo.readCommit(currentCommitID);
         for (String fileName : currentCommit._filePointers) {
@@ -346,15 +376,15 @@ public class CommandInterpreter {
                 iter = GitletRepo.readCommit(iter._parent);
                 commitFile = new File(".gitlet/objects/" + iter._id + "/" + fileName);
             }
-                    
+
             String workingDirectory = GitletRepo.getWorkingDirectory();
             File newfile = new File(workingDirectory + "/" + fileName);
             Utils.readContents(commitFile);
             Utils.writeContents(newfile, Utils.readContents(commitFile));
         }
-        
+
         untrackedStrings = GitletRepo.unTracked(currentCommit);
-        for (String fileString: untrackedStrings) {
+        for (String fileString : untrackedStrings) {
             File fileD = new File(GitletRepo.getWorkingDirectory() + "/" + fileString);
             fileD.delete();
         }
@@ -500,7 +530,7 @@ public class CommandInterpreter {
     private void rmCommand(String fileName) throws IOException, ClassNotFoundException {
         String stagingFileName = ".gitlet/objects/staging";
         GitletRepo gt = new GitletRepo(stagingFileName);
-        
+
         /** Need to change for all different branches. */
         String currentCommitId = GitletRepo.getCurrentHeadPointer();
         Commit currentHead = GitletRepo.readCommit(currentCommitId);
@@ -508,7 +538,7 @@ public class CommandInterpreter {
         _staged = (ArrayList<File>) gt.readObject(input);
         _removedFileNames = (ArrayList<String>) gt.readObject(input);
         _addedFileNames = (ArrayList<String>) gt.readObject(input);
-        
+
         if (_staged.isEmpty() || currentHead._filePointers.isEmpty()) {
             System.out.println("No reason to remove the file.");
             return;
@@ -525,7 +555,7 @@ public class CommandInterpreter {
             if (a.equals(fileName)) {
                 removedFileName = a;
                 _removedFileNames.add(removedFileName);
-                File f2 = new File(gt.getWorkingDirectory() + "/" + fileName);
+                File f2 = new File(GitletRepo.getWorkingDirectory() + "/" + fileName);
                 f2.delete();
             }
         }
@@ -552,13 +582,14 @@ public class CommandInterpreter {
         ArrayList<File> stagedFiles = (ArrayList<File>) gt.readObject(input);
         ArrayList<String> removedFileNames = (ArrayList<String>) gt.readObject(input);
         ArrayList<String> addedFileNames = (ArrayList<String>) gt.readObject(input);
-        
+
         if (addedFileNames.isEmpty() && removedFileNames.isEmpty()) {
             System.out.println("No changes added to the commit.");
         }
 
         /** 2nd gitletRepo to try to get the currentHead. */
-        GitletRepo gt2 = new GitletRepo(".gitlet/refs/branches/master");
+        // **********************************************************************************************************
+        GitletRepo gt2 = new GitletRepo(".gitlet/refs/branches/" + GitletRepo.getCurrentBranch());
         String currentCommitId = GitletRepo.getCurrentHeadPointer();
         Commit currentHead = GitletRepo.readCommit(currentCommitId);
 
@@ -628,6 +659,7 @@ public class CommandInterpreter {
 
             // GitletRepo gt = new GitletRepo(".gitlet/objects/" + auto._id +
             // "/" + auto._id);
+            // ********************************************************************************************
             GitletRepo gt2 = new GitletRepo(".gitlet/refs/branches/master");
             GitletRepo gt3 = new GitletRepo(".gitlet/objects/staging");
             GitletRepo gt4 = new GitletRepo(".gitlet/HEAD");
@@ -653,7 +685,7 @@ public class CommandInterpreter {
             _staged = (ArrayList<File>) gt.readObject(input);
             _removedFileNames = (ArrayList<String>) gt.readObject(input);
             _addedFileNames = (ArrayList<String>) gt.readObject(input);
-            File file = new File("./" + fileName);
+            File file = new File(GitletRepo.getWorkingDirectory() + "/" + fileName);
             byte[] contents = Utils.readContents(file);
             File destination = new File(".gitlet/objects/stagedFiles/" + fileName);
             Utils.writeContents(destination, contents);

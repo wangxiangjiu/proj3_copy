@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 public class GitletRepo implements Serializable {
 
     /** File being written to or read from .*/
-    private File _file;
+    protected File _file;
 
     /** Constructor that takes in a file. */
     public GitletRepo(File file) {
