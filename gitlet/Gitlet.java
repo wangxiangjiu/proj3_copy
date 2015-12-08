@@ -10,10 +10,10 @@ import java.util.Scanner;
  * 
  * @author Xiangjiu Wang.
  */
-public class Main {
+public class Gitlet {
 
     /**
-     * Usage: java gitlet.Main ARGS, where ARGS contains
+     * Usage: java gitlet.Gitlet ARGS, where ARGS contains
      * <COMMAND> <OPERAND> ....
      * 
      * @throws IOException

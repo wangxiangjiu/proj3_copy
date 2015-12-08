@@ -537,14 +537,14 @@ public class CommandInterpreter {
         System.out.println();
     }
     
-    public String[] allParentsOfBranch(String branchName) {
-        String headCommitID = GitletRepo.getBranchHead(branchName);
-        Commit headCommit = GitletRepo.readCommit(headCommitID);
-        while (headCommit._parent != null) {
-            System.out.println();
-        }
-        
-    }
+//    public String[] allParentsOfBranch(String branchName) {
+//        String headCommitID = GitletRepo.getBranchHead(branchName);
+//        Commit headCommit = GitletRepo.readCommit(headCommitID);
+//        while (headCommit._parent != null) {
+//            System.out.println();
+//        }
+//        
+//    }
 
     /**
      * Untrack the file with name FILENAME.
