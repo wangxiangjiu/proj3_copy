@@ -203,18 +203,18 @@ public class GitletRepo implements Serializable {
 
     public static List<String> unTracked(Commit currentCommit) {
         List<String> workingFileNames = Utils.plainFilenamesIn(GitletRepo.getWorkingDirectory());
-        System.out.println("current files:         " + currentCommit._filePointers);
-        System.out.println("working files:         " + workingFileNames);
+//        System.out.println("current files:         " + currentCommit._filePointers);
+//        System.out.println("working files:         " + workingFileNames);
         ArrayList<String> untrackedFiles = new ArrayList<String>();
         for (String fileName: workingFileNames) {
-            System.out.println("file considered: " + fileName);
+//            System.out.println("file considered: " + fileName);
             String a = "[.][a-zA-Z]*";
             String dsStore = ".DS_Store";
             if (Pattern.matches(a, fileName) || Pattern.matches(dsStore, fileName)) {
-                System.out.println("matched pattern: " + fileName);
+//                System.out.println("matched pattern: " + fileName);
                 /** Do nothing.*/
             } else if (!currentCommit._filePointers.contains(fileName)) {
-                System.out.println("file " + fileName + " is untracked");
+//                System.out.println("file " + fileName + " is untracked");
                 untrackedFiles.add(fileName);
             }
         }
@@ -227,4 +227,6 @@ public class GitletRepo implements Serializable {
         String head = getText(path);
         return head;
     }
+    
+
 }
